@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+
+  frontend:
+    build: ./frontend
+    container_name: inzercia_frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inzercia_backend
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+      - /var/www/vendor
+      - /var/www/bootstrap/cache
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:latest
+    container_name: inzercia_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+
+  mysql:
+    image: mysql:8
+    container_name: inzercia_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: inzercia
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: inzercia_mysql
+    ports:
+      - "8080:80"
+
+volumes:
+  db_data:
+    name: inzercia_db_data
