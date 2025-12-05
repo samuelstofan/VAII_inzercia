@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios"; // uprav podľa tvojej štruktúry
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext"; 
 
 export default function Login() {
   const navigate = useNavigate();
-
+  const { login } = useAuth(); 
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -24,25 +25,24 @@ export default function Login() {
     try {
       setLoading(true);
 
-      // 🔥 1. Načítaj CSRF cookie zo Sanctumu
       await api.get("/sanctum/csrf-cookie");
 
-      // 🔥 2. Pošli login request
       const res = await api.post("/login", form);
 
       console.log("Login OK:", res.data);
+
+      login();
+
       alert("Prihlásenie úspešné!");
-      // 🔥 Presmeruj po úspešnom logine
+
       navigate("/");
     } catch (err) {
       console.error(err);
 
       if (err.response?.data?.errors) {
-        // Laravel validation errors
         const first = Object.values(err.response.data.errors)[0][0];
         setError(first);
       } else if (err.response?.status === 422) {
-        // Nesprávne prihlasovacie údaje
         setError("Nesprávny email alebo heslo.");
       } else {
         setError("Prihlásenie zlyhalo.");

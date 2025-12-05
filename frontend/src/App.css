@@ -1,10 +1,15 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
 
+.header-container {
+  background-color: #3B82F6;
+  padding: 16px 24px;
+  border-bottom: 3px solid #000000;
+}
+.footer-container {
+  background-color: #3B82F6;
+  padding: 16px 24px;
+  border-top: 3px solid #000000;
+  color: white;
+}
 .logo {
   height: 6em;
   padding: 1.5em;

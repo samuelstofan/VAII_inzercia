@@ -8,6 +8,7 @@ import AddListing from "./pages/AddListing";
 import Sellers from "./pages/Sellers";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import MyAccount from "./pages/MyAccount";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/predajcovia" element={<Sellers />} />
           <Route path="/registracia" element={<Register />} />
           <Route path="/prihlasenie" element={<Login />} />
+          <Route path="/moj-ucet" element={<MyAccount />} />
         </Routes>
       </main>
 

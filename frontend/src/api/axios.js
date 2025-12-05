@@ -8,7 +8,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// pre POST/PUT/DELETE → načítame CSRF cookie
 api.interceptors.request.use(async (config) => {
   if (["post", "put", "patch", "delete"].includes(config.method)) {
     await axios.get(`${API_URL}/sanctum/csrf-cookie`, {

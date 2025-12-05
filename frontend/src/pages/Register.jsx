@@ -1,8 +1,9 @@
 import { useState } from "react";
-import api from "../api/axios"; // <-- pridaj import
+import api from "../api/axios"; 
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
-
+  const navigate = useNavigate();
   console.log("ENV FROM VITE:", import.meta.env.VITE_API_URL);
   const [form, setForm] = useState({
     name: "",
@@ -30,19 +31,18 @@ export default function Register() {
     try {
       setLoading(true);
 
-      // 🔥 1. Zavolaj sanctum cookie
       await api.get("/sanctum/csrf-cookie");
 
-      // 🔥 2. Pošli dáta na backend
       const res = await api.post("/register", form);
 
       console.log("Registrácia OK:", res.data);
       alert("Registrácia úspešná!");
+      
       await api.post("/logout");
+      navigate("/prihlasenie");
     } catch (err) {
       console.error(err);
 
-      // Backend validation errors
       if (err.response?.data?.errors) {
         const first = Object.values(err.response.data.errors)[0][0];
         setError(first);

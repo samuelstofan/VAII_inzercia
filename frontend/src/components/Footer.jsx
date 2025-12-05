@@ -1,9 +1,9 @@
 export default function Footer() {
   return (
-    <footer className="bg-gray-100 mt-10 py-10">
+    <footer className="footer-container">
       <div className="max-w-7xl mx-auto px-4">
 
-        <h2 className="text-3xl font-bold mb-6">Logo</h2>
+        <h2 className="text-3xl font-bold mb-6"><img src="/logo.png" alt="Logo" className="h-10 w-auto"></img></h2>
 
         <div className="grid grid-cols-3 gap-6 mb-10">
 
