@@ -17,6 +17,10 @@ export default function MyAccount() {
 
   const [deleting, setDeleting] = useState(false);
 
+  // === NEW ===
+  const [isSeller, setIsSeller] = useState(false);
+  const [savingSeller, setSavingSeller] = useState(false);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/prihlasenie");
@@ -28,6 +32,10 @@ export default function MyAccount() {
         const res = await api.get("/api/user");
         setUser(res.data);
         setNewName(res.data.name);
+
+        // === NEW ===
+        setIsSeller(res.data.is_seller ?? false);
+
       } catch (err) {
         console.error(err);
         setError("Nepodarilo sa načítať údaje používateľa.");
@@ -64,33 +72,53 @@ export default function MyAccount() {
     }
   };
 
+  // === NEW ===
+  const handleSellerToggle = async () => {
+    setSavingSeller(true);
+    setError("");
+    setSuccess("");
 
-const handleDeleteAccount = async () => {
-  const confirmDelete = window.confirm(
-    "Naozaj chcete vymazať svoj účet? Táto akcia je nevratná."
-  );
+    try {
+      const res = await api.put("/api/user/update", {
+        is_seller: !isSeller,
+      });
 
-  if (!confirmDelete) return;
+      setUser(res.data.user);
+      setIsSeller(res.data.user.is_seller);
+      setSuccess("Nastavenie predajcu bolo aktualizované.");
 
-  try {
-    setDeleting(true);
+    } catch (err) {
+      console.error(err);
+      setError("Nepodarilo sa upraviť mód predajcu.");
+    } finally {
+      setSavingSeller(false);
+    }
+  };
 
-    await api.post("/logout"); 
-    logout(); 
+  const handleDeleteAccount = async () => {
+    const confirmDelete = window.confirm(
+      "Naozaj chcete vymazať svoj účet? Táto akcia je nevratná."
+    );
 
-    await api.delete("/api/user/delete");
+    if (!confirmDelete) return;
 
-    alert("Váš účet bol úspešne vymazaný.");
-    navigate("/");
-  } catch (err) {
-    console.error(err);
-    alert("Nastala chyba pri vymazávaní účtu.");
-  } finally {
-    setDeleting(false);
-  }
-};
+    try {
+      setDeleting(true);
 
+      await api.post("/logout"); 
+      logout(); 
 
+      await api.delete("/api/user/delete");
+
+      alert("Váš účet bol úspešne vymazaný.");
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      alert("Nastala chyba pri vymazávaní účtu.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) return <div className="text-center mt-10">Načítavam údaje...</div>;
   if (error) return <div className="text-center text-red-600 mt-10">{error}</div>;
@@ -101,6 +129,7 @@ const handleDeleteAccount = async () => {
       <h1 className="text-2xl font-bold mb-6 text-center">Môj účet</h1>
 
       <div className="space-y-4 text-lg">
+
         <div>
           <strong>Meno:</strong>
           <p>{user.name}</p>
@@ -115,6 +144,15 @@ const handleDeleteAccount = async () => {
           <strong>Dátum vytvorenia účtu:</strong>
           <p>{new Date(user.created_at).toLocaleString()}</p>
         </div>
+
+        {/* === NEW === */}
+        <div>
+          <strong>Typ účtu:</strong>
+          <p className={isSeller ? "text-green-700" : "text-gray-600"}>
+            {isSeller ? "Registrovaný predajca" : "Bežný používateľ"}
+          </p>
+        </div>
+
       </div>
 
       <hr className="my-6" />
@@ -143,6 +181,27 @@ const handleDeleteAccount = async () => {
 
       <hr className="my-6" />
 
+      {/* === NEW === */}
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-3">Režim predajcu</h2>
+        <p className="text-gray-700 mb-2">
+          Aktivovaním sa zobrazíte v zozname predajcov.
+        </p>
+
+        <button
+          onClick={handleSellerToggle}
+          disabled={savingSeller}
+          className="bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50"
+        >
+          {savingSeller
+            ? "Ukladám..."
+            : isSeller
+              ? "Vypnúť režim predajcu"
+              : "Stať sa registrovaným predajcom"}
+        </button>
+      </div>
+
+      <hr className="my-6" />
 
       <div className="mt-6">
         <h2 className="text-xl font-semibold text-red-600 mb-3">
