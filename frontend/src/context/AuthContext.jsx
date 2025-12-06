@@ -22,7 +22,6 @@ export const AuthProvider = ({ children }) => {
         console.error("Logout failed:", err);
       }
     }
-
     setIsAuthenticated(false);
   };
 

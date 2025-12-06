@@ -54,7 +54,7 @@ export default function Header() {
           </Link>
         ) : (
           <button
-            onClick={logout}
+            onClick={()=>logout()}
             className="hidden md:block bg-red-600 text-white px-4 py-2 rounded-md"
           >
             Odhlásiť
