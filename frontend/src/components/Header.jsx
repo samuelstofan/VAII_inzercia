@@ -9,36 +9,36 @@ export default function Header() {
   const { isAuthenticated, logout } = useAuth();
 
   return (
-    <header className="header-container text-white relative">
-      <div className="max-w-7xl mx-auto flex items-center justify-between py-4 px-4">
+    <header className="header-container">
+      <div className="inner">
 
-        <Link to="/" className="text-2xl font-bold">
+        <Link to="/" className="logo-link">
           <img
             src={isHovered ? "/logoHover.png" : "/logo.png"}
             alt="Logo"
-            className="h-10 w-auto"
+            className="logo-img"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           />
         </Link>
 
         {/* DESKTOP MENU */}
-        <nav className="hidden md:flex gap-6 text-lg">
+        <nav className="desktop-menu">
 
-          <Link to="/pridat-inzerat" className="hover:text-gray-200">
+          <Link to="/pridat-inzerat">
             Pridať inzerát
           </Link>
 
-          <Link to="/predajcovia" className="hover:text-gray-200">
+          <Link to="/predajcovia">
             Zoznam predajcov
           </Link>
 
           {isAuthenticated ? (
-            <Link to="/moj-ucet" className="hover:text-gray-200">
+            <Link to="/moj-ucet">
               Môj účet
             </Link>
           ) : (
-            <Link to="/registracia" className="hover:text-gray-200">
+            <Link to="/registracia">
               Registrácia
             </Link>
           )}
@@ -48,31 +48,31 @@ export default function Header() {
         {!isAuthenticated ? (
           <Link
             to="/prihlasenie"
-            className="hidden md:block bg-black text-white px-4 py-2 rounded-md"
+            className="desktop-btn login"
           >
             Prihlásiť
           </Link>
         ) : (
           <button
-            onClick={()=>logout()}
-            className="hidden md:block bg-red-600 text-white px-4 py-2 rounded-md"
+            onClick={() => logout()}
+            className="desktop-btn logout"
           >
             Odhlásiť
           </button>
         )}
 
-      {/* MOBILE MENU */}
+        {/* MOBILE MENU TOGGLE */}
         <button
-          className="md:hidden text-white text-3xl"
+          className="mobile-toggle"
           onClick={() => setOpen(!open)}
         >
           ☰
         </button>
       </div>
 
+      {/* MOBILE MENU */}
       {open && (
-        <div className="md:hidden bg-blue-500 flex flex-col gap-4 py-4 px-6 text-lg">
-
+        <div className="mobile-menu">
 
           <Link to="/pridat-inzerat" onClick={() => setOpen(false)}>
             Pridať inzerát
@@ -93,7 +93,7 @@ export default function Header() {
                   logout();
                   setOpen(false);
                 }}
-                className="text-left bg-red-600 px-4 py-2 rounded-md text-white"
+                className="logout-btn"
               >
                 Odhlásiť
               </button>
@@ -106,7 +106,7 @@ export default function Header() {
 
               <Link
                 to="/prihlasenie"
-                className="bg-black px-4 py-2 rounded-md text-white"
+                className="login-btn"
                 onClick={() => setOpen(false)}
               >
                 Prihlásiť
