@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Api\VehicleController;
 
 Route::middleware(['auth:sanctum'])->get('/user', [UserController::class, 'getUser']);
 
@@ -10,5 +11,7 @@ Route::middleware('auth:sanctum')->put('/user/update', [UserController::class, '
 
 Route::middleware('auth:sanctum')->delete('/user/delete', [UserController::class, 'deleteUser']);
 
-Route::get('/sellers', [UserController::class, 'getSellers']);
+Route::get('/sellers', [UserController::class, 'getSellers']);;
 
+Route::get('/vehicles', [VehicleController::class, 'index']);
+Route::get('/vehicles/{id}', [VehicleController::class, 'show']);
