@@ -9,6 +9,7 @@ import Sellers from "./pages/Sellers";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import MyAccount from "./pages/MyAccount";
+import VehicleDetail from "./pages/VehicleDetail";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/registracia" element={<Register />} />
           <Route path="/prihlasenie" element={<Login />} />
           <Route path="/moj-ucet" element={<MyAccount />} />
+          <Route path="/vehicles/:id" element={<VehicleDetail />} />
         </Routes>
       </main>
 
