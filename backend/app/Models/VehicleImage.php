@@ -17,6 +17,9 @@ class VehicleImage extends Model
 
     public function getUrlAttribute()
     {
-        return Storage::disk('s3')->url($this->path);
+        return Storage::disk('s3')->temporaryUrl(
+            $this->path,
+            now()->addMinutes(15)
+        );
     }
 }

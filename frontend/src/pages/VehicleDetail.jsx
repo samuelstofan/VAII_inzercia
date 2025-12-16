@@ -17,11 +17,12 @@ export default function VehicleDetail() {
 
   if (loading) return <p>Načítavam...</p>;
   if (!vehicle) return <p>Inzerát neexistuje</p>;
-
+  console.log("V:",vehicle.images);
   return (
     <div className="max-w-5xl mx-auto px-4 mt-8">
       <h1 className="text-2xl font-bold mb-4">{vehicle.title}</h1>
 
+        
       {/* Obrázky */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {vehicle.images?.map((img) => (
