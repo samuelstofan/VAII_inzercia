@@ -67,4 +67,12 @@ class UserController extends Controller
     {
         return User::where('is_seller', true)->get();
     }
+
+    /**
+     * Get single seller
+     */
+    public function showSeller($id)
+    {
+        return User::where('is_seller', true)->findOrFail($id);
+    }
 }

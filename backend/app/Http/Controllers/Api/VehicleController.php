@@ -132,4 +132,24 @@ class VehicleController extends Controller
             201
         );
     }
+
+    /**
+     * GET /api/sellers/{id}/vehicles
+     */
+    public function bySeller(Request $request, $id)
+    {
+        $vehicles = Vehicle::query()
+            ->with([
+                'images',
+                'brand',
+                'model',
+            ])
+            ->where('user_id', $id)
+            ->where('is_active', true)
+            ->whereNotNull('published_at')
+            ->orderByDesc('published_at')
+            ->paginate(9);
+
+        return response()->json($vehicles);
+    }
 }

@@ -12,6 +12,8 @@ Route::middleware('auth:sanctum')->put('/user/update', [UserController::class, '
 Route::middleware('auth:sanctum')->delete('/user/delete', [UserController::class, 'deleteUser']);
 
 Route::get('/sellers', [UserController::class, 'getSellers']);;
+Route::get('/sellers/{id}', [UserController::class, 'showSeller']);
+Route::get('/sellers/{id}/vehicles', [VehicleController::class, 'bySeller']);
 
 Route::get('/vehicles', [VehicleController::class, 'index']);
 Route::get('/vehicles/{id}', [VehicleController::class, 'show']);

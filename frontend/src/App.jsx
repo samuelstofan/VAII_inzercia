@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import AddListing from "./pages/AddListing";
 import Sellers from "./pages/Sellers";
+import SellerListings from "./pages/SellerListings";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import MyAccount from "./pages/MyAccount";
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/pridat-inzerat" element={<AddListing />} />
           <Route path="/predajcovia" element={<Sellers />} />
+          <Route path="/predajcovia/:id" element={<SellerListings />} />
           <Route path="/registracia" element={<Register />} />
           <Route path="/prihlasenie" element={<Login />} />
           <Route path="/moj-ucet" element={<MyAccount />} />

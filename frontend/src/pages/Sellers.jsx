@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../api/axios";
 
 export default function Sellers() {
@@ -40,6 +41,12 @@ export default function Sellers() {
             >
               <h2 className="text-xl font-semibold">{seller.name}</h2>
               <p className="text-gray-700">{seller.email}</p>
+              <Link
+                to={`/predajcovia/${seller.id}`}
+                className="inline-block mt-3 text-blue-600"
+              >
+                Inzeráty predajcu
+              </Link>
               <p className="text-sm text-gray-500">
                 Registrovaný: {new Date(seller.created_at).toLocaleDateString()}
               </p>
