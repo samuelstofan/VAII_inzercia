@@ -11,6 +11,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN composer install --no-scripts
 
 COPY . /var/www
+COPY ./php.ini /usr/local/etc/php/conf.d/uploads.ini
 RUN composer dump-autoload
 
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache

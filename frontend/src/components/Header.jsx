@@ -33,6 +33,12 @@ export default function Header() {
             Zoznam predajcov
           </Link>
 
+          {isAuthenticated && (
+            <Link to="/oblubene">
+              Obľúbené inzeráty
+            </Link>
+          )}
+
           {isAuthenticated ? (
             <Link to="/moj-ucet">
               Môj účet
@@ -81,6 +87,12 @@ export default function Header() {
           <Link to="/predajcovia" onClick={() => setOpen(false)}>
             Zoznam predajcov
           </Link>
+
+          {isAuthenticated && (
+            <Link to="/oblubene" onClick={() => setOpen(false)}>
+              Obľúbené inzeráty
+            </Link>
+          )}
 
           {isAuthenticated ? (
             <>

@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 
 export default function VehicleDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
   
   const images = vehicle?.images || [];
 
@@ -39,12 +44,17 @@ export default function VehicleDetail() {
 
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/vehicles/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setVehicle(data);
+    api
+      .get(`/api/vehicles/${id}`)
+      .then((res) => {
+        setVehicle(res.data);
+        setIsFavorite(Boolean(res.data?.is_favorite));
         setLoading(false);
         setCurrentImage(0);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
       });
   }, [id]);
 
@@ -65,15 +75,50 @@ export default function VehicleDetail() {
     );
   };
 
+  const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      navigate("/prihlasenie");
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        await api.delete(`/api/favorites/${id}`);
+        setIsFavorite(false);
+      } else {
+        await api.post(`/api/favorites/${id}`);
+        setIsFavorite(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="vehicle-detail">
       {/* Nadpis */}
-      <h1 className="text-3xl font-bold mb-6">{vehicle.title}</h1>
+      <div className="vehicle-detail__title-row">
+        {isAuthenticated && (
+          <button
+            type="button"
+            onClick={handleFavoriteToggle}
+            className="vehicle-detail__favorite-btn"
+            aria-pressed={isFavorite}
+          >
+            <img
+              src={isFavorite ? "/heart-full.svg" : "/heart.svg"}
+              alt={isFavorite ? "Remove favorite" : "Add favorite"}
+              className="vehicle-detail__favorite-icon"
+            />
+          </button>
+        )}
+        <h1 className="vehicle-detail__title">{vehicle.title}</h1>
+      </div>
 
       {/* Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="vehicle-detail__layout">
         {/* Galéria */}
-        <div className="lg:col-span-2">
+        <div className="vehicle-detail__gallery">
           {images.length > 0 && (
             <>
               <div className="relative">
@@ -81,40 +126,46 @@ export default function VehicleDetail() {
                   src={images[currentImage].url}
                   alt=""
                   onClick={() => setLightboxOpen(true)}
-                  className="w-full h-[280px] sm:h-[380px] lg:h-[450px] object-cover rounded-xl"
+                  className="vehicle-detail__image"
                 />
 
                 {/* Šípky */}
                 {images.length > 1 && (
                   <>
-                    <button
-                      onClick={prevImage}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-black"
-                    >
-                      ‹
-                    </button>
+                  <button
+                    onClick={prevImage}
+                    className="vehicle-detail__nav vehicle-detail__nav--prev"
+                  >
+                    <img
+                      src="/chevron-left.svg"
+                      alt="Previous"
+                      className="vehicle-detail__nav-icon"
+                    />
+                  </button>
 
-                    <button
-                      onClick={nextImage}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white text-2xl w-10 h-10 rounded-full flex items-center justify-center hover:bg-black"
-                    >
-                      ›
-                    </button>
+                  <button
+                    onClick={nextImage}
+                    className="vehicle-detail__nav vehicle-detail__nav--next"
+                  >
+                    <img
+                      src="/chevron-right.svg"
+                      alt="Next"
+                      className="vehicle-detail__nav-icon"
+                    />
+                  </button>
                   </>
                 )}
               </div>
 
               {/* Náhľady */}
-              <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+              <div className="vehicle-detail__thumbs">
                 {images.map((img, index) => (
                   <img
                     key={img.id}
                     src={img.url}
                     onClick={() => setCurrentImage(index)}
-                    className={`h-20 w-28 object-cover rounded-lg cursor-pointer border-2 transition ${
-                      index === currentImage
-                        ? "border-blue-500"
-                        : "border-transparent"
+                    className={`vehicle-detail__thumb ${
+                      index === currentImage ? "is-active" : ""
                     }`}
                   />
                 ))}
@@ -124,12 +175,12 @@ export default function VehicleDetail() {
         </div>
 
         {/* Detail box */}
-        <div className="bg-white rounded-xl shadow p-6 h-fit">
-          <p className="text-3xl font-bold text-blue-600 mb-4">
+        <div className="vehicle-detail__box">
+          <p className="vehicle-detail__price">
             {vehicle.price.toLocaleString()} €
           </p>
 
-          <div className="space-y-2 text-sm">
+          <div className="vehicle-detail__specs">
             <div><strong>Značka:</strong> {vehicle.brand.name}</div>
             <div><strong>Model:</strong> {vehicle.model.name}</div>
             <div><strong>Rok:</strong> {vehicle.year}</div>
@@ -142,9 +193,9 @@ export default function VehicleDetail() {
       </div>
 
       {/* Popis */}
-      <div className="mt-8 bg-white rounded-xl shadow p-6">
-        <h2 className="text-xl font-semibold mb-3">Popis</h2>
-        <p className="text-gray-700 leading-relaxed">
+      <div className="vehicle-detail__description">
+        <h2 className="vehicle-detail__section-title">Popis</h2>
+        <p className="vehicle-detail__description-text">
           {vehicle.description}
         </p>
       </div>

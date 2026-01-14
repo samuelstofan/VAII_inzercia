@@ -25,7 +25,8 @@ export default function AddListing() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState(initialFormState);
-  const [images, setImages] = useState([]);
+  const [imageSlots, setImageSlots] = useState(Array(10).fill(null));
+  const [imagePreviews, setImagePreviews] = useState(Array(10).fill(null));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -35,8 +36,21 @@ export default function AddListing() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImagesChange = (event) => {
-    setImages(Array.from(event.target.files || []));
+  const handleSlotChange = (index) => (event) => {
+    const file = event.target.files?.[0] || null;
+    setImageSlots((prev) => {
+      const next = [...prev];
+      next[index] = file;
+      return next;
+    });
+    setImagePreviews((prev) => {
+      const next = [...prev];
+      if (next[index]) {
+        URL.revokeObjectURL(next[index]);
+      }
+      next[index] = file ? URL.createObjectURL(file) : null;
+      return next;
+    });
   };
 
   const handleSubmit = async (event) => {
@@ -51,17 +65,26 @@ export default function AddListing() {
         payload.append(key, value);
       }
     });
-    images.forEach((file) => payload.append("images[]", file));
+    imageSlots.forEach((file, index) => {
+      if (!file) return;
+      if (index === 0) {
+        payload.append("primary_image", file);
+      } else {
+        payload.append("images[]", file);
+      }
+    });
 
     try {
-      const response = await api.post("/api/vehicles", payload, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      setSuccess("Listing created.");
+      const response = await api.post("/api/vehicles", payload);
+      setSuccess("Inzerát bol vytvorený.");
       setForm(initialFormState);
-      setImages([]);
+      setImageSlots(Array(10).fill(null));
+      setImagePreviews((prev) => {
+        prev.forEach((url) => {
+          if (url) URL.revokeObjectURL(url);
+        });
+        return Array(10).fill(null);
+      });
       navigate(`/vehicles/${response.data.id}`);
     } catch (submitError) {
       const message =
@@ -69,7 +92,7 @@ export default function AddListing() {
         Object.values(submitError.response?.data?.errors || {})
           .flat()
           .join(", ") ||
-        "Failed to create listing.";
+        "Inzerát sa nepodarilo vytvoriť.";
       setError(message);
     } finally {
       setSubmitting(false);
@@ -79,15 +102,15 @@ export default function AddListing() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-4">Add listing</h1>
+        <h1 className="text-3xl font-bold mb-4">Pridať inzerát</h1>
         <p className="text-gray-600 mb-6">
-          Please sign in to create a new listing.
+          Na pridanie inzerátu sa prosím prihláste.
         </p>
         <Link
           to="/prihlasenie"
           className="inline-block bg-blue-600 text-white px-4 py-2 rounded-md"
         >
-          Go to login
+          Prihlásiť sa
         </Link>
       </div>
     );
@@ -95,7 +118,7 @@ export default function AddListing() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-6">Add listing</h1>
+      <h1 className="text-3xl font-bold mb-6">Pridať inzerát</h1>
 
       <form
         onSubmit={handleSubmit}
@@ -103,7 +126,7 @@ export default function AddListing() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Title</label>
+            <label className="block text-sm font-medium mb-1">Názov</label>
             <input
               type="text"
               name="title"
@@ -115,7 +138,7 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Location</label>
+            <label className="block text-sm font-medium mb-1">Lokalita</label>
             <input
               type="text"
               name="location"
@@ -127,7 +150,7 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Brand</label>
+            <label className="block text-sm font-medium mb-1">Značka</label>
             <input
               type="text"
               name="brand_name"
@@ -151,7 +174,7 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Year</label>
+            <label className="block text-sm font-medium mb-1">Rok</label>
             <input
               type="number"
               name="year"
@@ -165,7 +188,7 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Mileage</label>
+            <label className="block text-sm font-medium mb-1">Nájazd</label>
             <input
               type="number"
               name="mileage"
@@ -179,7 +202,7 @@ export default function AddListing() {
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Engine capacity (cc)
+              Objem motora (cc)
             </label>
             <input
               type="number"
@@ -192,7 +215,7 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Power (kW)</label>
+            <label className="block text-sm font-medium mb-1">Výkon (kW)</label>
             <input
               type="number"
               name="power"
@@ -204,16 +227,16 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Fuel</label>
+            <label className="block text-sm font-medium mb-1">Palivo</label>
             <select
               name="fuel"
               value={form.fuel}
               onChange={handleChange}
               className="w-full border rounded-md px-3 py-2"
             >
-              <option value="petrol">Petrol</option>
-              <option value="diesel">Diesel</option>
-              <option value="electric">Electric</option>
+              <option value="petrol">Benzín</option>
+              <option value="diesel">Nafta</option>
+              <option value="electric">Elektrina</option>
               <option value="hybrid">Hybrid</option>
               <option value="lpg">LPG</option>
             </select>
@@ -221,7 +244,7 @@ export default function AddListing() {
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Transmission
+              Prevodovka
             </label>
             <select
               name="transmission"
@@ -229,20 +252,20 @@ export default function AddListing() {
               onChange={handleChange}
               className="w-full border rounded-md px-3 py-2"
             >
-              <option value="manual">Manual</option>
-              <option value="automatic">Automatic</option>
+              <option value="manual">Manuálna</option>
+              <option value="automatic">Automatická</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Drive</label>
+            <label className="block text-sm font-medium mb-1">Pohon</label>
             <select
               name="drive"
               value={form.drive}
               onChange={handleChange}
               className="w-full border rounded-md px-3 py-2"
             >
-              <option value="">Not set</option>
+              <option value="">Nezadané</option>
               <option value="fwd">FWD</option>
               <option value="rwd">RWD</option>
               <option value="awd">AWD</option>
@@ -250,7 +273,7 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Price</label>
+            <label className="block text-sm font-medium mb-1">Cena</label>
             <input
               type="number"
               name="price"
@@ -263,7 +286,7 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Currency</label>
+            <label className="block text-sm font-medium mb-1">Mena</label>
             <input
               type="text"
               name="currency"
@@ -276,7 +299,7 @@ export default function AddListing() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
+          <label className="block text-sm font-medium mb-1">Popis</label>
           <textarea
             name="description"
             value={form.description}
@@ -288,14 +311,36 @@ export default function AddListing() {
 
         <div>
           <label className="block text-sm font-medium mb-1">
-            Images (up to 10)
+            Fotky (poradie 1–10)
           </label>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleImagesChange}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {imageSlots.map((_, index) => (
+              <label
+                key={index}
+                className="flex items-center gap-3 text-sm text-gray-700 border rounded-md p-2 cursor-pointer bg-gray-50 hover:bg-gray-100"
+              >
+                <span className="w-6 text-right">{index + 1}.</span>
+                {imagePreviews[index] ? (
+                  <img
+                    src={imagePreviews[index]}
+                    alt={`Náhľad ${index + 1}`}
+                    className="h-16 w-24 object-cover rounded"
+                  />
+                ) : (
+                  <span className="text-gray-500">Vybrať fotku</span>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleSlotChange(index)}
+                  className="hidden"
+                />
+                {imagePreviews[index] && (
+                  <span className="text-blue-600 text-xs">Nahradiť</span>
+                )}
+              </label>
+            ))}
+          </div>
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
@@ -307,7 +352,7 @@ export default function AddListing() {
             disabled={submitting}
             className="bg-blue-600 text-white px-5 py-2 rounded-md disabled:opacity-60"
           >
-            {submitting ? "Saving..." : "Create listing"}
+            {submitting ? "Ukladám..." : "Vytvoriť inzerát"}
           </button>
         </div>
       </form>

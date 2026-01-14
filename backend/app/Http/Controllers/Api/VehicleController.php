@@ -8,6 +8,7 @@ use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Models\CarModel;
 use App\Models\Brand;
+use Illuminate\Http\UploadedFile;
 
 class VehicleController extends Controller
 {
@@ -33,7 +34,7 @@ class VehicleController extends Controller
     /**
      * GET /api/vehicles/{id}
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $vehicle = Vehicle::with([
                 'images',
@@ -45,6 +46,15 @@ class VehicleController extends Controller
             ->whereNotNull('published_at')
             ->findOrFail($id);
 
+        $vehicle->is_favorite = false;
+        if ($request->user()) {
+            $vehicle->is_favorite = $request
+                ->user()
+                ->favoriteVehicles()
+                ->where('vehicle_id', $vehicle->id)
+                ->exists();
+        }
+
         return response()->json($vehicle);
     }
 
@@ -54,6 +64,7 @@ class VehicleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'primary_image' => ['nullable', 'file', 'image', 'max:4096'],
             'brand_id' => ['nullable', 'exists:brands,id', 'required_without:brand_name'],
             'brand_name' => ['nullable', 'string', 'max:255', 'required_without:brand_id'],
             'model_id' => ['nullable', 'exists:models,id', 'required_without:model_name'],
@@ -70,7 +81,7 @@ class VehicleController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'currency' => ['nullable', 'string', 'size:3'],
             'location' => ['required', 'string', 'max:255'],
-            'images' => ['nullable', 'array', 'max:10'],
+            'images' => ['nullable'],
             'images.*' => ['file', 'image', 'max:4096'],
         ]);
 
@@ -116,13 +127,35 @@ class VehicleController extends Controller
             'published_at' => now(),
         ]);
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $image) {
+        $images = $request->file('images', []);
+        if ($images instanceof UploadedFile) {
+            $images = [$images];
+        }
+        if (!is_array($images)) {
+            $images = [];
+        }
+        $primaryImage = $request->file('primary_image');
+        $totalImages = count($images) + ($primaryImage ? 1 : 0);
+        if ($totalImages > 10) {
+            return response()->json([
+                'message' => 'Maximum number of images is 10.',
+            ], 422);
+        }
+        if ($primaryImage) {
+            $path = $primaryImage->store("id{$vehicle->id}", 's3');
+            VehicleImage::create([
+                'vehicle_id' => $vehicle->id,
+                'path' => $path,
+                'is_primary' => true,
+            ]);
+        }
+        if (!empty($images)) {
+            foreach ($images as $image) {
                 $path = $image->store("id{$vehicle->id}", 's3');
                 VehicleImage::create([
                     'vehicle_id' => $vehicle->id,
                     'path' => $path,
-                    'is_primary' => $index === 0,
+                    'is_primary' => false,
                 ]);
             }
         }
