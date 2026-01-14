@@ -15,3 +15,4 @@ Route::get('/sellers', [UserController::class, 'getSellers']);;
 
 Route::get('/vehicles', [VehicleController::class, 'index']);
 Route::get('/vehicles/{id}', [VehicleController::class, 'show']);
+Route::middleware('auth:sanctum')->post('/vehicles', [VehicleController::class, 'store']);

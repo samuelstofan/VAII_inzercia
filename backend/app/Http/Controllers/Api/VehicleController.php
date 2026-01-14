@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Vehicle;
@@ -47,5 +46,90 @@ class VehicleController extends Controller
             ->findOrFail($id);
 
         return response()->json($vehicle);
+    }
+
+    /**
+     * POST /api/vehicles
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'brand_id' => ['nullable', 'exists:brands,id', 'required_without:brand_name'],
+            'brand_name' => ['nullable', 'string', 'max:255', 'required_without:brand_id'],
+            'model_id' => ['nullable', 'exists:models,id', 'required_without:model_name'],
+            'model_name' => ['nullable', 'string', 'max:255', 'required_without:model_id'],
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'year' => ['required', 'integer', 'between:1900,2100'],
+            'mileage' => ['required', 'integer', 'min:0'],
+            'engine_capacity' => ['nullable', 'integer', 'min:0'],
+            'power' => ['nullable', 'integer', 'min:0'],
+            'fuel' => ['required', 'in:petrol,diesel,electric,hybrid,lpg'],
+            'transmission' => ['required', 'in:manual,automatic'],
+            'drive' => ['nullable', 'in:fwd,rwd,awd'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'currency' => ['nullable', 'string', 'size:3'],
+            'location' => ['required', 'string', 'max:255'],
+            'images' => ['nullable', 'array', 'max:10'],
+            'images.*' => ['file', 'image', 'max:4096'],
+        ]);
+
+        $brand = null;
+        if ($request->filled('brand_id')) {
+            $brand = Brand::findOrFail($request->input('brand_id'));
+        } else {
+            $brand = Brand::firstOrCreate(['name' => $request->input('brand_name')]);
+        }
+
+        if ($request->filled('model_id')) {
+            $model = CarModel::findOrFail($request->input('model_id'));
+            if ($brand && $model->brand_id !== $brand->id) {
+                return response()->json([
+                    'message' => 'Model does not match brand.',
+                ], 422);
+            }
+            $brand = $brand ?: Brand::findOrFail($model->brand_id);
+        } else {
+            $model = CarModel::firstOrCreate([
+                'brand_id' => $brand->id,
+                'name' => $request->input('model_name'),
+            ]);
+        }
+
+        $vehicle = Vehicle::create([
+            'user_id' => $request->user()->id,
+            'brand_id' => $brand->id,
+            'model_id' => $model->id,
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'year' => $validated['year'],
+            'mileage' => $validated['mileage'],
+            'engine_capacity' => $validated['engine_capacity'] ?? null,
+            'power' => $validated['power'] ?? null,
+            'fuel' => $validated['fuel'],
+            'transmission' => $validated['transmission'],
+            'drive' => $validated['drive'] ?? null,
+            'price' => $validated['price'],
+            'currency' => $validated['currency'] ?? 'EUR',
+            'location' => $validated['location'],
+            'is_active' => true,
+            'published_at' => now(),
+        ]);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store("id{$vehicle->id}", 's3');
+                VehicleImage::create([
+                    'vehicle_id' => $vehicle->id,
+                    'path' => $path,
+                    'is_primary' => $index === 0,
+                ]);
+            }
+        }
+
+        return response()->json(
+            $vehicle->load(['images', 'brand', 'model']),
+            201
+        );
     }
 }
