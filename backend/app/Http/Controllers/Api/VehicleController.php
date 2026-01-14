@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Vehicle;
@@ -184,5 +185,26 @@ class VehicleController extends Controller
             ->paginate(9);
 
         return response()->json($vehicles);
+    }
+
+    /**
+     * DELETE /api/vehicles/{id}
+     */
+    public function destroy(Request $request, $id)
+    {
+        $vehicle = Vehicle::with('images')->findOrFail($id);
+
+        if ($vehicle->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Forbidden.',
+            ], 403);
+        }
+
+        Storage::disk('s3')->deleteDirectory("id{$vehicle->id}");
+        $vehicle->delete();
+
+        return response()->json([
+            'message' => 'Listing deleted.',
+        ]);
     }
 }

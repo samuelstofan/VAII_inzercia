@@ -12,6 +12,7 @@ export default function VehicleDetail() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
   
   const images = vehicle?.images || [];
 
@@ -58,6 +59,19 @@ export default function VehicleDetail() {
       });
   }, [id]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    api
+      .get("/api/user")
+      .then((res) => {
+        setCurrentUserId(res.data?.id ?? null);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [isAuthenticated]);
+
   if (loading) return <p className="text-center mt-10">Načítavam...</p>;
   if (!vehicle) return <p className="text-center mt-10">Inzerát neexistuje</p>;
 
@@ -89,6 +103,20 @@ export default function VehicleDetail() {
         await api.post(`/api/favorites/${id}`);
         setIsFavorite(true);
       }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteListing = async () => {
+    if (!isAuthenticated || !vehicle?.id) return;
+
+    const confirmed = window.confirm("Naozaj chcete odstrániť inzerát?");
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/api/vehicles/${vehicle.id}`);
+      navigate("/");
     } catch (err) {
       console.error(err);
     }
@@ -199,6 +227,18 @@ export default function VehicleDetail() {
           {vehicle.description}
         </p>
       </div>
+
+      {isAuthenticated && currentUserId === vehicle.user?.id && (
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            onClick={handleDeleteListing}
+            className="bg-red-600 text-white px-5 py-2 rounded-md"
+          >
+            Odstrániť inzerát
+          </button>
+        </div>
+      )}
       {/* LIGHTBOX */}
 {lightboxOpen && (
   <div
