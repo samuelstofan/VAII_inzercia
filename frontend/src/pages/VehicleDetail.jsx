@@ -122,6 +122,11 @@ export default function VehicleDetail() {
     }
   };
 
+  const handleEditListing = () => {
+    if (!vehicle?.id) return;
+    navigate(`/upravit-inzerat/${vehicle.id}`);
+  };
+
   return (
     <div className="vehicle-detail">
       {/* Nadpis */}
@@ -223,13 +228,20 @@ export default function VehicleDetail() {
       {/* Popis */}
       <div className="vehicle-detail__description">
         <h2 className="vehicle-detail__section-title">Popis</h2>
-        <p className="vehicle-detail__description-text">
+        <pre className="vehicle-detail__description-text whitespace-pre-wrap">
           {vehicle.description}
-        </p>
+        </pre>
       </div>
 
       {isAuthenticated && currentUserId === vehicle.user?.id && (
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={handleEditListing}
+            className="bg-gray-200 text-gray-800 px-5 py-2 rounded-md"
+          >
+            Upraviť inzerát
+          </button>
           <button
             type="button"
             onClick={handleDeleteListing}

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 
@@ -23,11 +23,14 @@ const initialFormState = {
 export default function AddListing() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
 
   const [form, setForm] = useState(initialFormState);
   const [imageSlots, setImageSlots] = useState(Array(10).fill(null));
   const [imagePreviews, setImagePreviews] = useState(Array(10).fill(null));
   const [submitting, setSubmitting] = useState(false);
+  const [loadingListing, setLoadingListing] = useState(isEditMode);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
@@ -45,13 +48,55 @@ export default function AddListing() {
     });
     setImagePreviews((prev) => {
       const next = [...prev];
-      if (next[index]) {
+      if (next[index] && next[index].startsWith("blob:")) {
         URL.revokeObjectURL(next[index]);
       }
       next[index] = file ? URL.createObjectURL(file) : null;
       return next;
     });
   };
+
+  useEffect(() => {
+    if (!isEditMode || !isAuthenticated) return;
+
+    setLoadingListing(true);
+    setError(null);
+
+    api
+      .get(`/api/vehicles/${id}`)
+      .then((response) => {
+        const data = response.data || {};
+        setForm({
+          title: data.title ?? "",
+          brand_name: data.brand?.name ?? "",
+          model_name: data.model?.name ?? "",
+          description: data.description ?? "",
+          year: data.year ?? "",
+          mileage: data.mileage ?? "",
+          engine_capacity: data.engine_capacity ?? "",
+          power: data.power ?? "",
+          fuel: data.fuel ?? "petrol",
+          transmission: data.transmission ?? "manual",
+          drive: data.drive ?? "",
+          price: data.price ?? "",
+          currency: data.currency ?? "EUR",
+          location: data.location ?? "",
+        });
+        const nextPreviews = Array(10).fill(null);
+        (data.images || []).slice(0, 10).forEach((image, index) => {
+          nextPreviews[index] = image.url;
+        });
+        setImagePreviews(nextPreviews);
+        setImageSlots(Array(10).fill(null));
+      })
+      .catch((loadError) => {
+        console.error(loadError);
+        setError("Nepodarilo sa nacitat inzerat.");
+      })
+      .finally(() => {
+        setLoadingListing(false);
+      });
+  }, [id, isAuthenticated, isEditMode]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -75,16 +120,24 @@ export default function AddListing() {
     });
 
     try {
-      const response = await api.post("/api/vehicles", payload);
+      if (isEditMode) {
+        payload.append("_method", "PUT");
+      }
+      const response = isEditMode
+        ? await api.post(`/api/vehicles/${id}`, payload)
+        : await api.post("/api/vehicles", payload);
       setSuccess("Inzerát bol vytvorený.");
-      setForm(initialFormState);
-      setImageSlots(Array(10).fill(null));
-      setImagePreviews((prev) => {
-        prev.forEach((url) => {
-          if (url) URL.revokeObjectURL(url);
+      setSuccess(isEditMode ? "Inzerát bol upravený." : "Inzerát bol vytvorený.");
+      if (!isEditMode) {
+        setForm(initialFormState);
+        setImageSlots(Array(10).fill(null));
+        setImagePreviews((prev) => {
+          prev.forEach((url) => {
+            if (url) URL.revokeObjectURL(url);
+          });
+          return Array(10).fill(null);
         });
-        return Array(10).fill(null);
-      });
+      }
       navigate(`/vehicles/${response.data.id}`);
     } catch (submitError) {
       const message =
@@ -116,9 +169,15 @@ export default function AddListing() {
     );
   }
 
+  if (isEditMode && loadingListing) {
+    return <p className="text-center mt-10">Načítavam...</p>;
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-6">Pridať inzerát</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        {isEditMode ? "Zmeniť inzerát" : "Pridať inzerát"}
+      </h1>
 
       <form
         onSubmit={handleSubmit}
@@ -352,7 +411,11 @@ export default function AddListing() {
             disabled={submitting}
             className="bg-blue-600 text-white px-5 py-2 rounded-md disabled:opacity-60"
           >
-            {submitting ? "Ukladám..." : "Vytvoriť inzerát"}
+            {submitting
+              ? "Ukladám..."
+              : isEditMode
+              ? "Upraviť inzerát"
+              : "Vytvoriť inzerát"}
           </button>
         </div>
       </form>

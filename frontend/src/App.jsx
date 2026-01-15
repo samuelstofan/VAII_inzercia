@@ -23,6 +23,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/pridat-inzerat" element={<AddListing />} />
+          <Route path="/upravit-inzerat/:id" element={<AddListing />} />
           <Route path="/predajcovia" element={<Sellers />} />
           <Route path="/predajcovia/:id" element={<SellerListings />} />
           <Route path="/registracia" element={<Register />} />
