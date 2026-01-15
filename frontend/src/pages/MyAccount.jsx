@@ -12,6 +12,7 @@ export default function MyAccount() {
   const [error, setError] = useState("");
 
   const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
 
@@ -32,8 +33,8 @@ export default function MyAccount() {
         const res = await api.get("/api/user");
         setUser(res.data);
         setNewName(res.data.name);
+        setNewPhone(res.data.phone ?? "");
 
-        // === NEW ===
         setIsSeller(res.data.is_seller ?? false);
 
       } catch (err) {
@@ -60,7 +61,10 @@ export default function MyAccount() {
     try {
       setSaving(true);
 
-      const res = await api.put("/api/user/update", { name: newName });
+      const res = await api.put("/api/user/update", {
+        name: newName,
+        phone: newPhone,
+      });
 
       setUser(res.data.user);
       setSuccess("Meno bolo úspešne zmenené.");
@@ -139,6 +143,10 @@ export default function MyAccount() {
           <strong>Email:</strong>
           <p>{user.email}</p>
         </div>
+        <div>
+          <strong>Telefón:</strong>
+          <p>{user.phone || "-"}</p>
+        </div>
 
         <div>
           <strong>Dátum vytvorenia účtu:</strong>
@@ -157,12 +165,21 @@ export default function MyAccount() {
 
       <hr className="my-6" />
 
-      <h2 className="text-xl font-semibold mb-3">Zmeniť meno</h2>
+      <h2 className="text-xl font-semibold mb-3">Zmena údajov</h2>
 
       {success && <p className="text-green-600 mb-3">{success}</p>}
       {error && <p className="text-red-600 mb-3">{error}</p>}
 
       <form onSubmit={handleNameChange} className="flex flex-col gap-3">
+        <label className="text-sm text-gray-600">Telefón</label>
+        <input
+          type="tel"
+          value={newPhone}
+          onChange={(e) => setNewPhone(e.target.value)}
+          className="border px-3 py-2 rounded"
+          placeholder="+421..."
+        />
+        <label className="text-sm text-gray-600">Meno</label>
         <input
           type="text"
           value={newName}
@@ -175,7 +192,7 @@ export default function MyAccount() {
           disabled={saving}
           className="bg-black text-white py-2 rounded disabled:opacity-50"
         >
-          {saving ? "Ukladám..." : "Uložiť meno"}
+          {saving ? "Ukladám..." : "Uložiť"}
         </button>
       </form>
 
@@ -223,3 +240,4 @@ export default function MyAccount() {
     </div>
   );
 }
+

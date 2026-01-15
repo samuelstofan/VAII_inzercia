@@ -23,6 +23,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:32',
             'is_seller' => 'nullable|boolean',
         ]);
 
@@ -30,6 +31,11 @@ class UserController extends Controller
 
         if ($request->filled('name')) {
             $user->name = $request->name;
+        }
+
+        if ($request->has('phone')) {
+            $phone = $request->input('phone');
+            $user->phone = $phone !== '' ? $phone : null;
         }
 
         if ($request->has('is_seller')) {

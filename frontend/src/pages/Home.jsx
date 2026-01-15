@@ -19,6 +19,8 @@ export default function Home() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(initialFilters);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 2;
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
@@ -28,6 +30,10 @@ export default function Home() {
   const handleFilterReset = () => {
     setFilters(initialFilters);
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   useEffect(() => {
     fetch("http://localhost:8000/api/vehicles")
@@ -106,6 +112,23 @@ export default function Home() {
     });
   }, [filters, listings]);
 
+  const totalPages = Math.ceil(filteredListings.length / pageSize);
+
+  useEffect(() => {
+    if (totalPages === 0 && currentPage !== 1) {
+      setCurrentPage(1);
+      return;
+    }
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedListings = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredListings.slice(start, start + pageSize);
+  }, [currentPage, filteredListings]);
+
   return (
     <div>
       <FilterBar
@@ -123,12 +146,16 @@ export default function Home() {
           <p>Žiadne inzeráty neboli nájdené</p>
         )}
 
-        {filteredListings.map((item) => (
+        {paginatedListings.map((item) => (
           <ListingCard key={item.id} vehicle={item} />
         ))}
       </div>
 
-      <Pagination />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

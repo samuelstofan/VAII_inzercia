@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
@@ -13,7 +13,8 @@ export default function VehicleDetail() {
   const [currentImage, setCurrentImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
-  
+  const [contactOpen, setContactOpen] = useState(false);
+
   const images = vehicle?.images || [];
   const fuelLabel = vehicle?.fuel?.label || vehicle?.fuel?.code || "";
   const transmissionLabel =
@@ -22,7 +23,6 @@ export default function VehicleDetail() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      //if (!lightboxOpen) return;
       if (!images.length) return;
 
       if (e.key === "ArrowRight") {
@@ -45,8 +45,6 @@ export default function VehicleDetail() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [lightboxOpen, images.length]);
-
-
 
   useEffect(() => {
     api
@@ -78,8 +76,6 @@ export default function VehicleDetail() {
 
   if (loading) return <p className="text-center mt-10">Načítavam...</p>;
   if (!vehicle) return <p className="text-center mt-10">Inzerát neexistuje</p>;
-
-  
 
   const nextImage = () => {
     setCurrentImage((prev) =>
@@ -131,6 +127,11 @@ export default function VehicleDetail() {
     navigate(`/upravit-inzerat/${vehicle.id}`);
   };
 
+  const handleSendMessage = () => {
+    setContactOpen(false);
+    navigate(`/spravy?user=${vehicle.user?.id}`);
+  };
+
   return (
     <div className="vehicle-detail">
       {/* Nadpis */}
@@ -169,27 +170,27 @@ export default function VehicleDetail() {
                 {/* Šípky */}
                 {images.length > 1 && (
                   <>
-                  <button
-                    onClick={prevImage}
-                    className="vehicle-detail__nav vehicle-detail__nav--prev"
-                  >
-                    <img
-                      src="/chevron-left.svg"
-                      alt="Previous"
-                      className="vehicle-detail__nav-icon"
-                    />
-                  </button>
+                    <button
+                      onClick={prevImage}
+                      className="vehicle-detail__nav vehicle-detail__nav--prev"
+                    >
+                      <img
+                        src="/chevron-left.svg"
+                        alt="Previous"
+                        className="vehicle-detail__nav-icon"
+                      />
+                    </button>
 
-                  <button
-                    onClick={nextImage}
-                    className="vehicle-detail__nav vehicle-detail__nav--next"
-                  >
-                    <img
-                      src="/chevron-right.svg"
-                      alt="Next"
-                      className="vehicle-detail__nav-icon"
-                    />
-                  </button>
+                    <button
+                      onClick={nextImage}
+                      className="vehicle-detail__nav vehicle-detail__nav--next"
+                    >
+                      <img
+                        src="/chevron-right.svg"
+                        alt="Next"
+                        className="vehicle-detail__nav-icon"
+                      />
+                    </button>
                   </>
                 )}
               </div>
@@ -214,7 +215,7 @@ export default function VehicleDetail() {
         {/* Detail box */}
         <div className="vehicle-detail__box">
           <p className="vehicle-detail__price">
-            {vehicle.price.toLocaleString()} €
+            {vehicle.price.toLocaleString()} EUR
           </p>
 
           <div className="vehicle-detail__specs">
@@ -226,6 +227,22 @@ export default function VehicleDetail() {
             <div><strong>Prevodovka:</strong> {transmissionLabel}</div>
             <div><strong>Pohon:</strong> {driveLabel || "-"}</div>
             <div><strong>Lokalita:</strong> {vehicle.location}</div>
+          </div>
+          <div className="mt-4 border-t pt-4">
+            <h3 className="text-lg font-semibold mb-2">Kontakt</h3>
+            {(vehicle.user?.email || vehicle.user?.phone) ? (
+              <button
+                type="button"
+                onClick={() => setContactOpen(true)}
+                className="inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-md"
+              >
+                Kontaktovať predajcu
+              </button>
+            ) : (
+              <p className="text-sm text-gray-600">
+                Kontakt na predajcu nie je dostupný.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -256,56 +273,105 @@ export default function VehicleDetail() {
           </button>
         </div>
       )}
-      {/* LIGHTBOX */}
-{lightboxOpen && (
-  <div
-    className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
-    onClick={() => setLightboxOpen(false)}
-  >
-    {/* Zavrieť */}
-    <button
-      onClick={() => setLightboxOpen(false)}
-      className="absolute top-5 right-5 text-white text-3xl"
-    >
-      ✕
-    </button>
 
-    {/* Predošlá */}
-    {images.length > 1 && (
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          prevImage();
-        }}
-        className="absolute left-5 text-white text-5xl"
-      >
-        ‹
-      </button>
-    )}
+      {contactOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
+          onClick={() => setContactOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Kontakt na predajcu</h3>
+              <button
+                type="button"
+                className="text-gray-500"
+                onClick={() => setContactOpen(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div>
+                <span className="font-semibold">Email:</span>{" "}
+                {vehicle.user?.email || "-"}
+              </div>
+              <div>
+                <span className="font-semibold">Telefón:</span>{" "}
+                {vehicle.user?.phone || "-"}
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={handleSendMessage}
+                className="bg-green-600 text-white px-4 py-2 rounded-md"
+              >
+                Poslať správu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-    {/* Obrázok */}
-    <img
-      src={images[currentImage].url}
-      alt=""
-      onClick={(e) => e.stopPropagation()}
-      className="max-h-[90vh] max-w-[90vw] object-contain rounded"
-    />
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
+          onClick={() => setLightboxOpen(false)}
+        >
+          {/* Zavrieť */}
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-5 right-5 text-white text-3xl"
+          >
+            &times;
+          </button>
 
-    {/* Ďalšia */}
-    {images.length > 1 && (
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          nextImage();
-        }}
-        className="absolute right-5 text-white text-5xl"
-      >
-        ›
-      </button>
-    )}
-  </div>
-)}
+          {/* Predošlá */}
+          {images.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                prevImage();
+              }}
+              className="absolute left-5 text-white text-5xl"
+            >
+              <img
+                  src="/chevron-left.svg"
+                  alt="Previous"
+                  className="vehicle-detail__nav-icon"
+                />
+            </button>
+          )}
 
+          {/* Obrázok */}
+          <img
+            src={images[currentImage].url}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded"
+          />
+
+          {/* Ďalšia */}
+          {images.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                nextImage();
+              }}
+              className="absolute right-5 text-white text-5xl"
+            >
+              <img
+                src="/chevron-right.svg"
+                alt="Next"
+                className="vehicle-detail__nav-icon"
+              />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
