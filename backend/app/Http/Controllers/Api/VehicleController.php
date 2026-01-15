@@ -9,6 +9,9 @@ use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Models\CarModel;
 use App\Models\Brand;
+use App\Models\Fuel;
+use App\Models\Transmission;
+use App\Models\Drive;
 use Illuminate\Http\UploadedFile;
 
 class VehicleController extends Controller
@@ -23,6 +26,9 @@ class VehicleController extends Controller
                 'images',
                 'brand',
                 'model',
+                'fuel',
+                'transmission',
+                'drive',
             ])
             ->where('is_active', true)
             ->whereNotNull('published_at')
@@ -41,6 +47,9 @@ class VehicleController extends Controller
                 'images',
                 'brand',
                 'model',
+                'fuel',
+                'transmission',
+                'drive',
                 'user',
             ])
             ->where('is_active', true)
@@ -64,6 +73,10 @@ class VehicleController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->input('drive') === '') {
+            $request->merge(['drive' => null]);
+        }
+
         $validated = $request->validate([
             'primary_image' => ['nullable', 'file', 'image', 'max:4096'],
             'brand_id' => ['nullable', 'exists:brands,id', 'required_without:brand_name'],
@@ -76,9 +89,9 @@ class VehicleController extends Controller
             'mileage' => ['required', 'integer', 'min:0'],
             'engine_capacity' => ['nullable', 'integer', 'min:0'],
             'power' => ['nullable', 'integer', 'min:0'],
-            'fuel' => ['required', 'in:petrol,diesel,electric,hybrid,lpg'],
-            'transmission' => ['required', 'in:manual,automatic'],
-            'drive' => ['nullable', 'in:fwd,rwd,awd'],
+            'fuel' => ['required', 'string', 'exists:fuels,code'],
+            'transmission' => ['required', 'string', 'exists:transmissions,code'],
+            'drive' => ['nullable', 'string', 'exists:drives,code'],
             'price' => ['required', 'numeric', 'min:0'],
             'currency' => ['nullable', 'string', 'size:3'],
             'location' => ['required', 'string', 'max:255'],
@@ -108,6 +121,12 @@ class VehicleController extends Controller
             ]);
         }
 
+        $fuelId = Fuel::where('code', $validated['fuel'])->firstOrFail()->id;
+        $transmissionId = Transmission::where('code', $validated['transmission'])->firstOrFail()->id;
+        $driveId = isset($validated['drive'])
+            ? Drive::where('code', $validated['drive'])->firstOrFail()->id
+            : null;
+
         $vehicle = Vehicle::create([
             'user_id' => $request->user()->id,
             'brand_id' => $brand->id,
@@ -118,9 +137,9 @@ class VehicleController extends Controller
             'mileage' => $validated['mileage'],
             'engine_capacity' => $validated['engine_capacity'] ?? null,
             'power' => $validated['power'] ?? null,
-            'fuel' => $validated['fuel'],
-            'transmission' => $validated['transmission'],
-            'drive' => $validated['drive'] ?? null,
+            'fuel' => $fuelId,
+            'transmission' => $transmissionId,
+            'drive' => $driveId,
             'price' => $validated['price'],
             'currency' => $validated['currency'] ?? 'EUR',
             'location' => $validated['location'],
@@ -162,7 +181,7 @@ class VehicleController extends Controller
         }
 
         return response()->json(
-            $vehicle->load(['images', 'brand', 'model']),
+            $vehicle->load(['images', 'brand', 'model', 'fuel', 'transmission', 'drive']),
             201
         );
     }
@@ -180,6 +199,10 @@ class VehicleController extends Controller
             ], 403);
         }
 
+        if ($request->input('drive') === '') {
+            $request->merge(['drive' => null]);
+        }
+
         $validated = $request->validate([
             'primary_image' => ['nullable', 'file', 'image', 'max:4096'],
             'brand_id' => ['nullable', 'exists:brands,id', 'required_without:brand_name'],
@@ -192,9 +215,9 @@ class VehicleController extends Controller
             'mileage' => ['required', 'integer', 'min:0'],
             'engine_capacity' => ['nullable', 'integer', 'min:0'],
             'power' => ['nullable', 'integer', 'min:0'],
-            'fuel' => ['required', 'in:petrol,diesel,electric,hybrid,lpg'],
-            'transmission' => ['required', 'in:manual,automatic'],
-            'drive' => ['nullable', 'in:fwd,rwd,awd'],
+            'fuel' => ['required', 'string', 'exists:fuels,code'],
+            'transmission' => ['required', 'string', 'exists:transmissions,code'],
+            'drive' => ['nullable', 'string', 'exists:drives,code'],
             'price' => ['required', 'numeric', 'min:0'],
             'currency' => ['nullable', 'string', 'size:3'],
             'location' => ['required', 'string', 'max:255'],
@@ -224,6 +247,12 @@ class VehicleController extends Controller
             ]);
         }
 
+        $fuelId = Fuel::where('code', $validated['fuel'])->firstOrFail()->id;
+        $transmissionId = Transmission::where('code', $validated['transmission'])->firstOrFail()->id;
+        $driveId = isset($validated['drive'])
+            ? Drive::where('code', $validated['drive'])->firstOrFail()->id
+            : null;
+
         $vehicle->update([
             'brand_id' => $brand->id,
             'model_id' => $model->id,
@@ -233,9 +262,9 @@ class VehicleController extends Controller
             'mileage' => $validated['mileage'],
             'engine_capacity' => $validated['engine_capacity'] ?? null,
             'power' => $validated['power'] ?? null,
-            'fuel' => $validated['fuel'],
-            'transmission' => $validated['transmission'],
-            'drive' => $validated['drive'] ?? null,
+            'fuel' => $fuelId,
+            'transmission' => $transmissionId,
+            'drive' => $driveId,
             'price' => $validated['price'],
             'currency' => $validated['currency'] ?? 'EUR',
             'location' => $validated['location'],
@@ -282,7 +311,7 @@ class VehicleController extends Controller
         }
 
         return response()->json(
-            $vehicle->load(['images', 'brand', 'model'])
+            $vehicle->load(['images', 'brand', 'model', 'fuel', 'transmission', 'drive'])
         );
     }
 
@@ -296,6 +325,9 @@ class VehicleController extends Controller
                 'images',
                 'brand',
                 'model',
+                'fuel',
+                'transmission',
+                'drive',
             ])
             ->where('user_id', $id)
             ->where('is_active', true)

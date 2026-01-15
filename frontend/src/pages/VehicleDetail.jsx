@@ -15,6 +15,10 @@ export default function VehicleDetail() {
   const [currentUserId, setCurrentUserId] = useState(null);
   
   const images = vehicle?.images || [];
+  const fuelLabel = vehicle?.fuel?.label || vehicle?.fuel?.code || "";
+  const transmissionLabel =
+    vehicle?.transmission?.label || vehicle?.transmission?.code || "";
+  const driveLabel = vehicle?.drive?.label || vehicle?.drive?.code || "";
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -218,8 +222,9 @@ export default function VehicleDetail() {
             <div><strong>Model:</strong> {vehicle.model.name}</div>
             <div><strong>Rok:</strong> {vehicle.year}</div>
             <div><strong>Nájazd:</strong> {vehicle.mileage.toLocaleString()} km</div>
-            <div><strong>Palivo:</strong> {vehicle.fuel}</div>
-            <div><strong>Prevodovka:</strong> {vehicle.transmission}</div>
+            <div><strong>Palivo:</strong> {fuelLabel}</div>
+            <div><strong>Prevodovka:</strong> {transmissionLabel}</div>
+            <div><strong>Pohon:</strong> {driveLabel || "-"}</div>
             <div><strong>Lokalita:</strong> {vehicle.location}</div>
           </div>
         </div>

@@ -81,7 +81,7 @@ export default function Home() {
       if (filters.model && item?.model?.name !== filters.model) {
         return false;
       }
-      if (filters.fuel && item?.fuel !== filters.fuel) {
+      if (filters.fuel && item?.fuel?.code !== filters.fuel) {
         return false;
       }
       if (priceMin !== null && item?.price < priceMin) {

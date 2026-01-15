@@ -15,7 +15,7 @@ class FavoriteController extends Controller
     {
         $vehicles = $request->user()
             ->favoriteVehicles()
-            ->with(['images', 'brand', 'model'])
+            ->with(['images', 'brand', 'model', 'fuel', 'transmission', 'drive'])
             ->where('is_active', true)
             ->whereNotNull('published_at')
             ->orderByDesc('published_at')

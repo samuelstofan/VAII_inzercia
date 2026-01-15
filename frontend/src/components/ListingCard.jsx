@@ -4,14 +4,12 @@ export default function ListingCard({ vehicle }) {
   const primaryImage =
     vehicle.images?.find((img) => img.is_primary)?.url ||
     vehicle.images?.[0]?.url;
-  const fuelLabels = {
-    petrol: "Benzín",
-    diesel: "Nafta",
-    electric: "Elektrina",
-    hybrid: "Hybrid",
-    lpg: "LPG",
+  const getLabel = (value) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    return value.label || value.code || "";
   };
-  const fuelLabel = fuelLabels[vehicle.fuel] || vehicle.fuel || "";
+  const fuelLabel = getLabel(vehicle.fuel);
 
   return (
     <Link
@@ -34,12 +32,12 @@ export default function ListingCard({ vehicle }) {
         <h3 className="font-bold text-xl">{vehicle.title}</h3>
 
         <p className="text-gray-600 text-base">
-          {fuelLabel} • {vehicle.year} • {vehicle.mileage.toLocaleString()} km •{" "}
+          {fuelLabel} - {vehicle.year} - {vehicle.mileage.toLocaleString()} km -{" "}
           {vehicle.location}
         </p>
 
         <p className="font-semibold mt-2 text-lg">
-          {vehicle.price.toLocaleString()} €
+          {vehicle.price.toLocaleString()} EUR
         </p>
       </div>
     </Link>

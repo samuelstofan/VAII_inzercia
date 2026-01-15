@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\VehicleImage;
 use App\Models\CarModel;
 use App\Models\Brand;
+use App\Models\Fuel;
+use App\Models\Transmission;
+use App\Models\Drive;
 
 class Vehicle extends Model
 {
@@ -47,6 +50,21 @@ class Vehicle extends Model
     public function model()
     {
         return $this->belongsTo(CarModel::class, 'model_id');
+    }
+
+    public function fuel()
+    {
+        return $this->belongsTo(Fuel::class, 'fuel');
+    }
+
+    public function transmission()
+    {
+        return $this->belongsTo(Transmission::class, 'transmission');
+    }
+
+    public function drive()
+    {
+        return $this->belongsTo(Drive::class, 'drive');
     }
 
     public function user()
