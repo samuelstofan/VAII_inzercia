@@ -4,13 +4,21 @@ export default function ListingCard({ vehicle }) {
   const primaryImage =
     vehicle.images?.find((img) => img.is_primary)?.url ||
     vehicle.images?.[0]?.url;
+  const fuelLabels = {
+    petrol: "Benzín",
+    diesel: "Nafta",
+    electric: "Elektrina",
+    hybrid: "Hybrid",
+    lpg: "LPG",
+  };
+  const fuelLabel = fuelLabels[vehicle.fuel] || vehicle.fuel || "";
 
   return (
     <Link
       to={`/vehicles/${vehicle.id}`}
-      className="block border rounded-lg shadow-sm p-4 flex gap-4 bg-white hover:shadow-md transition"
+      className="block border rounded-xl shadow-sm p-6 flex gap-6 bg-white hover:shadow-md transition"
     >
-      <div className="w-24 h-24 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center">
+      <div className="w-32 h-32 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
         {primaryImage ? (
           <img
             src={primaryImage}
@@ -18,19 +26,19 @@ export default function ListingCard({ vehicle }) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="text-gray-400">🖼</span>
+          <span className="text-gray-400"></span>
         )}
       </div>
 
       <div className="flex-1">
-        <h3 className="font-bold text-lg">{vehicle.title}</h3>
+        <h3 className="font-bold text-xl">{vehicle.title}</h3>
 
-        <p className="text-gray-600 text-sm">
-          {vehicle.year} • {vehicle.mileage.toLocaleString()} km •{" "}
+        <p className="text-gray-600 text-base">
+          {fuelLabel} • {vehicle.year} • {vehicle.mileage.toLocaleString()} km •{" "}
           {vehicle.location}
         </p>
 
-        <p className="font-semibold mt-1">
+        <p className="font-semibold mt-2 text-lg">
           {vehicle.price.toLocaleString()} €
         </p>
       </div>
