@@ -20,11 +20,23 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(initialFilters);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 2;
+  const [pageSize, setPageSize] = useState(2);
+  const [sortOption, setSortOption] = useState("newest");
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePageSizeChange = (event) => {
+    const nextSize = Number(event.target.value);
+    setPageSize(nextSize);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (event) => {
+    setSortOption(event.target.value);
+    setCurrentPage(1);
   };
 
   const handleFilterReset = () => {
@@ -33,7 +45,7 @@ export default function Home() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters]);
+  }, [filters, pageSize, sortOption]);
 
   useEffect(() => {
     fetch("http://localhost:8000/api/vehicles")
@@ -52,9 +64,7 @@ export default function Home() {
     const names = listings
       .map((item) => item?.brand?.name)
       .filter(Boolean);
-    return Array.from(new Set(names)).sort((a, b) =>
-      a.localeCompare(b)
-    );
+    return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
   }, [listings]);
 
   const modelOptions = useMemo(() => {
@@ -64,9 +74,7 @@ export default function Home() {
       )
       .map((item) => item?.model?.name)
       .filter(Boolean);
-    return Array.from(new Set(models)).sort((a, b) =>
-      a.localeCompare(b)
-    );
+    return Array.from(new Set(models)).sort((a, b) => a.localeCompare(b));
   }, [listings, filters.brand]);
 
   const filteredListings = useMemo(() => {
@@ -112,7 +120,45 @@ export default function Home() {
     });
   }, [filters, listings]);
 
-  const totalPages = Math.ceil(filteredListings.length / pageSize);
+  const sortedListings = useMemo(() => {
+    const parseDate = (value) => {
+      const timestamp = Date.parse(value);
+      return Number.isNaN(timestamp) ? 0 : timestamp;
+    };
+
+    const items = [...filteredListings];
+
+    switch (sortOption) {
+      case "az":
+        items.sort((a, b) =>
+          (a?.title || "").localeCompare(b?.title || "", "sk", {
+            sensitivity: "base",
+          })
+        );
+        break;
+      case "price-asc":
+        items.sort((a, b) => (a?.price ?? 0) - (b?.price ?? 0));
+        break;
+      case "price-desc":
+        items.sort((a, b) => (b?.price ?? 0) - (a?.price ?? 0));
+        break;
+      case "oldest":
+        items.sort(
+          (a, b) => parseDate(a?.created_at) - parseDate(b?.created_at)
+        );
+        break;
+      case "newest":
+      default:
+        items.sort(
+          (a, b) => parseDate(b?.created_at) - parseDate(a?.created_at)
+        );
+        break;
+    }
+
+    return items;
+  }, [filteredListings, sortOption]);
+
+  const totalPages = Math.ceil(sortedListings.length / pageSize);
 
   useEffect(() => {
     if (totalPages === 0 && currentPage !== 1) {
@@ -126,8 +172,11 @@ export default function Home() {
 
   const paginatedListings = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return filteredListings.slice(start, start + pageSize);
-  }, [currentPage, filteredListings]);
+    return sortedListings.slice(start, start + pageSize);
+  }, [currentPage, sortedListings, pageSize]);
+
+  const needsBottomGap =
+    !loading && sortedListings.length > 0 && paginatedListings.length < pageSize;
 
   return (
     <div>
@@ -137,12 +186,20 @@ export default function Home() {
         onReset={handleFilterReset}
         brands={brandOptions}
         models={modelOptions}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
+        sortOption={sortOption}
+        onSortChange={handleSortChange}
       />
 
-      <div className="max-w-7xl mx-auto px-4 mt-8 flex flex-col gap-5">
+      <div
+        className={`max-w-7xl mx-auto px-4 mt-8 flex flex-col gap-5 ${
+          needsBottomGap ? "mb-16" : ""
+        }`}
+      >
         {loading && <p>Načítavam inzeráty...</p>}
 
-        {!loading && filteredListings.length === 0 && (
+        {!loading && sortedListings.length === 0 && (
           <p>Žiadne inzeráty neboli nájdené</p>
         )}
 
@@ -159,5 +216,3 @@ export default function Home() {
     </div>
   );
 }
-
-

@@ -34,9 +34,6 @@ export default function Register() {
       await api.get("/sanctum/csrf-cookie");
 
       const res = await api.post("/register", form);
-
-      console.log("Registrácia OK:", res.data);
-      alert("Registrácia úspešná!");
       
       await api.post("/logout");
       navigate("/prihlasenie");

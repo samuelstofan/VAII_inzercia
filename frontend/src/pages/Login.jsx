@@ -29,11 +29,7 @@ export default function Login() {
 
       const res = await api.post("/login", form);
 
-      console.log("Login OK:", res.data);
-
       login();
-
-      alert("Prihlásenie úspešné!");
 
       navigate("/");
     } catch (err) {

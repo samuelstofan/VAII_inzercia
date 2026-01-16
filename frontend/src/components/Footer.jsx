@@ -3,7 +3,7 @@
     <footer className="footer-container">
       <div className="max-w-7xl mx-auto px-4">
 
-        <h2 className="text-3xl font-bold mb-6"><img src="/logo.png" alt="Logo" className="h-10 w-auto"></img></h2>
+        <h2 className="text-3xl font-bold mb-6"><img src="/logo.png" alt="Logo" className="w-48 h-auto"></img></h2>
 
         <div className="grid grid-cols-3 gap-6 mb-10">
 
@@ -20,7 +20,7 @@
           </div>
 
           <div className="flex flex-col gap-3">
-            <button className="bg-black text-white px-5 py-2 rounded-md w-fit">Registrovat</button>
+            <button className="bg-black text-white px-5 py-2 rounded-md w-fit">Registrovať</button>
             <button className="bg-blue-500 text-white px-5 py-2 rounded-md w-fit">Prihlásiť</button>
           </div>
 

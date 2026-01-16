@@ -4,6 +4,10 @@
   onReset,
   brands,
   models,
+  pageSize,
+  onPageSizeChange,
+  sortOption,
+  onSortChange,
 }) {
   const hasActiveFilters = Object.values(filters).some(
     (value) => String(value).trim() !== ""
@@ -11,10 +15,9 @@
 
   return (
     <div className="max-w-7xl mx-auto px-4 mt-6">
-      {/* Filter controls */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
-          <label className="text-sm block mb-1">Znacka</label>
+          <label className="text-sm block mb-1">Značka</label>
           <select
             name="brand"
             value={filters.brand}
@@ -29,7 +32,7 @@
             ))}
           </select>
         </div>
-        
+
         <div>
           <label className="text-sm block mb-1">Model</label>
           <select
@@ -127,7 +130,7 @@
             className="w-full border rounded-lg px-3 py-2"
           >
             <option value="">Všetky</option>
-            <option value="petrol">BenzA?n</option>
+            <option value="petrol">Benzín</option>
             <option value="diesel">Nafta</option>
             <option value="electric">Elektrina</option>
             <option value="hybrid">Hybrid</option>
@@ -149,9 +152,39 @@
             Zrušiť filtre
           </button>
         </div>
+
+        <div>
+          <label className="text-sm block mb-1">Zoradenie</label>
+          <select
+            name="sortOption"
+            value={sortOption}
+            onChange={onSortChange}
+            className="w-full border rounded-lg px-3 py-2"
+          >
+            <option value="az">A-Z</option>
+            <option value="price-asc">Najlacnejšie</option>
+            <option value="price-desc">Najdrahšie</option>
+            <option value="newest">Najnovšie</option>
+            <option value="oldest">Najstaršie</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm block mb-1">Počet inzerátov</label>
+          <select
+            name="pageSize"
+            value={pageSize}
+            onChange={onPageSizeChange}
+            className="w-full border rounded-lg px-3 py-2"
+          >
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="12">12</option>
+            <option value="24">24</option>
+          </select>
+        </div>
       </div>
     </div>
   );
 }
-
-
