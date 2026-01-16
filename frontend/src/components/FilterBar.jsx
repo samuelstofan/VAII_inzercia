@@ -1,4 +1,4 @@
-export default function FilterBar({
+﻿export default function FilterBar({
   filters,
   onChange,
   onReset,
@@ -14,7 +14,7 @@ export default function FilterBar({
       {/* Filter controls */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
-          <label className="text-sm block mb-1">Značka</label>
+          <label className="text-sm block mb-1">Znacka</label>
           <select
             name="brand"
             value={filters.brand}
@@ -153,3 +153,5 @@ export default function FilterBar({
     </div>
   );
 }
+
+

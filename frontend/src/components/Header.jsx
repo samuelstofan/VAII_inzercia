@@ -1,9 +1,8 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
-  const [isHovered, setIsHovered] = useState(false);
   const [open, setOpen] = useState(false);
 
   const { isAuthenticated, logout } = useAuth();
@@ -14,11 +13,9 @@ export default function Header() {
 
         <Link to="/" className="logo-link">
           <img
-            src={isHovered ? "/logoHover.png" : "/logo.png"}
+            src="/logo.png"
             alt="Logo"
-            className="logo-img"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            className="logo-img w-48 h-auto"
           />
         </Link>
 
@@ -40,9 +37,12 @@ export default function Header() {
           )}
 
           {isAuthenticated ? (
+            <>
+              <Link to="/spravy">Správy</Link>
             <Link to="/moj-ucet">
               Môj účet
             </Link>
+            </>
           ) : (
             <Link to="/registracia">
               Registrácia
@@ -72,7 +72,7 @@ export default function Header() {
           className="mobile-toggle"
           onClick={() => setOpen(!open)}
         >
-          ☰
+          ?
         </button>
       </div>
 
@@ -96,6 +96,9 @@ export default function Header() {
 
           {isAuthenticated ? (
             <>
+              <Link to="/spravy" onClick={() => setOpen(false)}>
+                Správy
+              </Link>
               <Link to="/moj-ucet" onClick={() => setOpen(false)}>
                 Môj účet
               </Link>
@@ -131,3 +134,5 @@ export default function Header() {
     </header>
   );
 }
+
+

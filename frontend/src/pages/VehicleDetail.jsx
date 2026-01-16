@@ -129,7 +129,7 @@ export default function VehicleDetail() {
 
   const handleSendMessage = () => {
     setContactOpen(false);
-    navigate(`/spravy?user=${vehicle.user?.id}`);
+    navigate(`/spravy?user=${vehicle.user?.id}&vehicle=${vehicle.id}`);
   };
 
   return (
@@ -219,7 +219,7 @@ export default function VehicleDetail() {
           </p>
 
           <div className="vehicle-detail__specs">
-            <div><strong>Značka:</strong> {vehicle.brand.name}</div>
+            <div><strong>Znacka:</strong> {vehicle.brand.name}</div>
             <div><strong>Model:</strong> {vehicle.model.name}</div>
             <div><strong>Rok:</strong> {vehicle.year}</div>
             <div><strong>Nájazd:</strong> {vehicle.mileage.toLocaleString()} km</div>
@@ -236,7 +236,7 @@ export default function VehicleDetail() {
                 onClick={() => setContactOpen(true)}
                 className="inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-md"
               >
-                Kontaktovať predajcu
+                Kontaktovat predajcu
               </button>
             ) : (
               <p className="text-sm text-gray-600">
@@ -321,7 +321,7 @@ export default function VehicleDetail() {
           className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
           onClick={() => setLightboxOpen(false)}
         >
-          {/* Zavrieť */}
+          {/* Zavriet */}
           <button
             onClick={() => setLightboxOpen(false)}
             className="absolute top-5 right-5 text-white text-3xl"
@@ -375,3 +375,6 @@ export default function VehicleDetail() {
     </div>
   );
 }
+
+
+

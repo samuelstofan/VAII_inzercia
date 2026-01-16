@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../api/axios";
 import ListingCard from "../components/ListingCard";
@@ -27,7 +27,7 @@ export default function SellerListings() {
       } catch (err) {
         console.error(err);
         if (!isMounted) return;
-        setError("Nepodarilo sa načítať inzeráty predajcu.");
+        setError("Nepodarilo sa načítať Inzeráty predajcu.");
       } finally {
         if (!isMounted) return;
         setLoading(false);
@@ -70,3 +70,5 @@ export default function SellerListings() {
     </div>
   );
 }
+
+

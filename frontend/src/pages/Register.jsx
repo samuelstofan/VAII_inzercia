@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import api from "../api/axios"; 
 import { useNavigate } from "react-router-dom";
 
@@ -111,9 +111,12 @@ export default function Register() {
           disabled={loading}
           className="bg-blue-500 text-white py-2 rounded-lg disabled:opacity-50"
         >
-          {loading ? "Registrujem..." : "Registrovať"}
+          {loading ? "Registrujem..." : "Registrovat"}
         </button>
       </form>
     </div>
   );
 }
+
+
+

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function MyAccount() {
   const { isAuthenticated, logout } = useAuth(); 
@@ -70,7 +70,7 @@ export default function MyAccount() {
       setSuccess("Meno bolo úspešne zmenené.");
     } catch (err) {
       console.error(err);
-      setError("Meno sa nepodarilo zmeniť.");
+      setError("Meno sa nepodarilo zmenit.");
     } finally {
       setSaving(false);
     }
@@ -129,7 +129,13 @@ export default function MyAccount() {
   if (!user) return <div className="text-center mt-10">Údaje používateľa nie sú dostupné.</div>;
 
   return (
-    <div className="max-w-lg mx-auto mt-10 bg-white p-8 rounded-lg shadow">
+    <div className="max-w-lg mx-auto mt-10">
+      <div className="flex items-center justify-end mb-2">
+        <Link to="/" className="text-blue-600">
+          Späť na domovskú stránku
+        </Link>
+      </div>
+      <div className="bg-white p-8 rounded-lg shadow">
       <h1 className="text-2xl font-bold mb-6 text-center">Môj účet</h1>
 
       <div className="space-y-4 text-lg">
@@ -234,10 +240,15 @@ export default function MyAccount() {
           disabled={deleting}
           className="bg-red-600 text-white py-2 px-4 rounded disabled:opacity-50"
         >
-          {deleting ? "Mažem účet..." : "Vymazať môj účet"}
+          {deleting ? "Mažem účet..." : "Vymazat Môj účet"}
         </button>
+      </div>
       </div>
     </div>
   );
 }
+
+
+
+
 

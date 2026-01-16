@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\MessageController;
 
 Route::middleware(['auth:sanctum'])->get('/user', [UserController::class, 'getUser']);
 
@@ -25,3 +26,7 @@ Route::middleware('auth:sanctum')->delete('/vehicles/{id}', [VehicleController::
 Route::middleware('auth:sanctum')->get('/favorites', [FavoriteController::class, 'index']);
 Route::middleware('auth:sanctum')->post('/favorites/{vehicle}', [FavoriteController::class, 'store']);
 Route::middleware('auth:sanctum')->delete('/favorites/{vehicle}', [FavoriteController::class, 'destroy']);
+
+Route::middleware('auth:sanctum')->get('/messages', [MessageController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/messages/threads', [MessageController::class, 'threads']);
+Route::middleware('auth:sanctum')->post('/messages', [MessageController::class, 'store']);

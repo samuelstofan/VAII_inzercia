@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
@@ -38,11 +38,11 @@ export default function Favorites() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex flex-col gap-2 mb-6">
-        <Link to="/moj-ucet" className="text-blue-600">
-          Naspäť na môj účet
-        </Link>
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Obľúbené inzeráty</h1>
+        <Link to="/" className="text-blue-600">
+          Späť na domovskú stránku
+        </Link>
       </div>
 
       {listings.length === 0 ? (
@@ -57,3 +57,10 @@ export default function Favorites() {
     </div>
   );
 }
+
+
+
+
+
+
+

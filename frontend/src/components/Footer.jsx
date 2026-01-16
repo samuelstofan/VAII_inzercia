@@ -1,4 +1,4 @@
-export default function Footer() {
+﻿export default function Footer() {
   return (
     <footer className="footer-container">
       <div className="max-w-7xl mx-auto px-4">
@@ -20,20 +20,22 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <button className="bg-black text-white px-5 py-2 rounded-md w-fit">Registrovať</button>
+            <button className="bg-black text-white px-5 py-2 rounded-md w-fit">Registrovat</button>
             <button className="bg-blue-500 text-white px-5 py-2 rounded-md w-fit">Prihlásiť</button>
           </div>
 
         </div>
 
         <div className="flex gap-4 text-xl">
-          <span>📘</span>
-          <span>🔗</span>
-          <span>▶️</span>
-          <span>📸</span>
+          <span>??</span>
+          <span>??</span>
+          <span>??</span>
+          <span>??</span>
         </div>
 
       </div>
     </footer>
   );
 }
+
+

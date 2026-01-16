@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
 
@@ -28,8 +28,12 @@ export default function Sellers() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Zoznam predajcov</h1>
-
+      <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold">Zoznam predajcov</h1>
+          <Link to="/" className="text-blue-600">
+            Späť na domovskú stránku
+          </Link>
+      </div>
       {sellers.length === 0 ? (
         <p className="text-gray-600">Zatiaľ tu nie sú žiadni registrovaní predajcovia.</p>
       ) : (
@@ -57,3 +61,6 @@ export default function Sellers() {
     </div>
   );
 }
+
+
+

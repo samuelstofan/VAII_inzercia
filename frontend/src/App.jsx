@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import MyAccount from "./pages/MyAccount";
 import VehicleDetail from "./pages/VehicleDetail";
 import Favorites from "./pages/Favorites";
+import Messages from "./pages/Messages";
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/moj-ucet" element={<MyAccount />} />
           <Route path="/oblubene" element={<Favorites />} />
           <Route path="/vehicles/:id" element={<VehicleDetail />} />
+          <Route path="/spravy" element={<Messages />} />
         </Routes>
       </main>
 

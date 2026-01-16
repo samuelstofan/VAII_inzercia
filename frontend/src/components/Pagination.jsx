@@ -1,4 +1,4 @@
-export default function Pagination({
+﻿export default function Pagination({
   currentPage,
   totalPages,
   onPageChange,
@@ -83,3 +83,5 @@ export default function Pagination({
     </div>
   );
 }
+
+

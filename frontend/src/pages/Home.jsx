@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import FilterBar from "../components/FilterBar";
 import ListingCard from "../components/ListingCard";
 import Pagination from "../components/Pagination";
@@ -159,3 +159,5 @@ export default function Home() {
     </div>
   );
 }
+
+

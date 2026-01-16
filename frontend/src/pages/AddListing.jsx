@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
@@ -155,7 +155,12 @@ export default function AddListing() {
   if (!isAuthenticated) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-4">Pridať inzerát</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold">Pridať inzerát</h1>
+          <Link to="/" className="text-blue-600">
+            Späť na domovskú stránku
+          </Link>
+        </div>
         <p className="text-gray-600 mb-6">
           Na pridanie inzerátu sa prosím prihláste.
         </p>
@@ -175,9 +180,14 @@ export default function AddListing() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-6">
-        {isEditMode ? "Zmeniť inzerát" : "Pridať inzerát"}
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">
+          {isEditMode ? "Zmeniť inzerát" : "Pridať inzerát"}
+        </h1>
+        <Link to="/" className="text-blue-600">
+          Späť na domovskú stránku
+        </Link>
+      </div>
 
       <form
         onSubmit={handleSubmit}
@@ -422,3 +432,8 @@ export default function AddListing() {
     </div>
   );
 }
+
+
+
+
+
