@@ -24,6 +24,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'is_seller',
+        'role',
     ];
 
     /**
@@ -62,5 +63,10 @@ class User extends Authenticatable
     public function receivedMessages()
     {
         return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 }

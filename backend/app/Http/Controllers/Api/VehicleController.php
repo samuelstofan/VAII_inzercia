@@ -193,7 +193,8 @@ class VehicleController extends Controller
     {
         $vehicle = Vehicle::with('images')->findOrFail($id);
 
-        if ($vehicle->user_id !== $request->user()->id) {
+        $user = $request->user();
+        if ($vehicle->user_id !== $user->id && !$user->isAdmin()) {
             return response()->json([
                 'message' => 'Forbidden.',
             ], 403);
@@ -345,7 +346,8 @@ class VehicleController extends Controller
     {
         $vehicle = Vehicle::with('images')->findOrFail($id);
 
-        if ($vehicle->user_id !== $request->user()->id) {
+        $user = $request->user();
+        if ($vehicle->user_id !== $user->id && !$user->isAdmin()) {
             return response()->json([
                 'message' => 'Forbidden.',
             ], 403);

@@ -1,41 +1,88 @@
-﻿export default function Footer() {
+﻿import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
+export default function Footer() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <footer className="footer-container">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="footer-inner">
+        <h2 className="footer-logo">
+          <img src="/logo.png" alt="Logo" />
+        </h2>
 
-        <h2 className="text-3xl font-bold mb-6"><img src="/logo.png" alt="Logo" className="w-48 h-auto"></img></h2>
-
-        <div className="grid grid-cols-3 gap-6 mb-10">
-
+        <div className="footer-grid">
           <div>
-            <h3 className="font-semibold mb-3">O nás</h3>
-            <p>Kontakt</p>
-            <p>O nás</p>
+            <h3 className="footer-column-title">O nás</h3>
+            <p>
+              <Link to="/kontakt">Kontakt</Link>
+            </p>
+            <p>
+              <Link to="/o-nas">O nás</Link>
+            </p>
           </div>
 
           <div>
-            <h3 className="font-semibold mb-3">Podpora</h3>
+            <h3 className="footer-column-title">Podpora</h3>
             <p>Nahlásenie inzerátu</p>
-            <p>FAQ</p>
+            <p>
+              <Link to="/faq">FAQ</Link>
+            </p>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <button className="bg-black text-white px-5 py-2 rounded-md w-fit">Registrovať</button>
-            <button className="bg-blue-500 text-white px-5 py-2 rounded-md w-fit">Prihlásiť</button>
-          </div>
-
+          {!isAuthenticated && (
+            <div className="footer-actions">
+              <Link
+                to="/registracia"
+                className="footer-button footer-button--inverse"
+              >
+                Registrovať
+              </Link>
+              <Link
+                to="/prihlasenie"
+                className="footer-button footer-button--inverse"
+              >
+                Prihlásiť
+              </Link>
+            </div>
+          )}
         </div>
 
-        <div className="flex gap-4 text-xl">
-          <span>??</span>
-          <span>??</span>
-          <span>??</span>
-          <span>??</span>
+        <div className="footer-socials">
+          <a
+            href="https://www.facebook.com"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Facebook"
+          >
+            <img src="/brand-facebook.svg" alt="Facebook" />
+          </a>
+          <a
+            href="https://www.instagram.com"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Instagram"
+          >
+            <img src="/brand-instagram.svg" alt="Instagram" />
+          </a>
+          <a
+            href="https://x.com"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="X"
+          >
+            <img src="/brand-x.svg" alt="X" />
+          </a>
+          <a
+            href="https://www.linkedin.com"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="LinkedIn"
+          >
+            <img src="/brand-linkedin.svg" alt="LinkedIn" />
+          </a>
         </div>
-
       </div>
     </footer>
   );
 }
-
-

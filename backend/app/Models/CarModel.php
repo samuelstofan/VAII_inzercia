@@ -5,4 +5,9 @@ class CarModel extends Model
 {
     protected $table = 'models';
     protected $fillable = ['brand_id', 'name'];
+
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
+    }
 }

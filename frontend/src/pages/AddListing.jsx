@@ -5,7 +5,9 @@ import { useAuth } from "../context/AuthContext";
 
 const initialFormState = {
   title: "",
+  brand_id: "",
   brand_name: "",
+  model_id: "",
   model_name: "",
   description: "",
   year: "",
@@ -34,9 +36,56 @@ export default function AddListing() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  const [brands, setBrands] = useState([]);
+  const [models, setModels] = useState([]);
+  const [loadingBrands, setLoadingBrands] = useState(true);
+  const [loadingModels, setLoadingModels] = useState(false);
+
+  const [brandChoice, setBrandChoice] = useState("");
+  const [modelChoice, setModelChoice] = useState("");
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleBrandChange = (event) => {
+    const value = event.target.value;
+    if (value === "other") {
+      setBrandChoice("other");
+      setForm((prev) => ({
+        ...prev,
+        brand_id: "",
+        brand_name: "",
+        model_id: "",
+        model_name: "",
+      }));
+      setModels([]);
+      setModelChoice("");
+      return;
+    }
+
+    setBrandChoice(value);
+    setForm((prev) => ({
+      ...prev,
+      brand_id: value,
+      brand_name: "",
+      model_id: "",
+      model_name: "",
+    }));
+    setModelChoice("");
+  };
+
+  const handleModelChange = (event) => {
+    const value = event.target.value;
+    if (value === "other") {
+      setModelChoice("other");
+      setForm((prev) => ({ ...prev, model_id: "", model_name: "" }));
+      return;
+    }
+
+    setModelChoice(value);
+    setForm((prev) => ({ ...prev, model_id: value, model_name: "" }));
   };
 
   const handleSlotChange = (index) => (event) => {
@@ -57,6 +106,70 @@ export default function AddListing() {
   };
 
   useEffect(() => {
+    let isMounted = true;
+    setLoadingBrands(true);
+
+    api
+      .get("/api/brands")
+      .then((res) => {
+        if (!isMounted) return;
+        setBrands(res.data || []);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!isMounted) return;
+        setError("Nepodarilo sa načítať značky.");
+      })
+      .finally(() => {
+        if (!isMounted) return;
+        setLoadingBrands(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!form.brand_id) {
+      setModels([]);
+      setForm((prev) => ({ ...prev, model_id: "", model_name: "" }));
+      return;
+    }
+
+    let isMounted = true;
+    setLoadingModels(true);
+
+    api
+      .get(`/api/brands/${form.brand_id}/models`)
+      .then((res) => {
+        if (!isMounted) return;
+        const nextModels = res.data || [];
+        setModels(nextModels);
+        setForm((prev) => {
+          if (!prev.model_id) return prev;
+          const match = nextModels.some(
+            (model) => String(model.id) === String(prev.model_id)
+          );
+          return match ? prev : { ...prev, model_id: "" };
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!isMounted) return;
+        setModels([]);
+      })
+      .finally(() => {
+        if (!isMounted) return;
+        setLoadingModels(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [form.brand_id]);
+
+  useEffect(() => {
     if (!isEditMode || !isAuthenticated) return;
 
     setLoadingListing(true);
@@ -66,10 +179,14 @@ export default function AddListing() {
       .get(`/api/vehicles/${id}`)
       .then((response) => {
         const data = response.data || {};
+        const brandId = data.brand?.id ? String(data.brand.id) : "";
+        const modelId = data.model?.id ? String(data.model.id) : "";
         setForm({
           title: data.title ?? "",
-          brand_name: data.brand?.name ?? "",
-          model_name: data.model?.name ?? "",
+          brand_id: brandId,
+          brand_name: "",
+          model_id: modelId,
+          model_name: "",
           description: data.description ?? "",
           year: data.year ?? "",
           mileage: data.mileage ?? "",
@@ -82,6 +199,8 @@ export default function AddListing() {
           currency: data.currency ?? "EUR",
           location: data.location ?? "",
         });
+        setBrandChoice(brandId);
+        setModelChoice(modelId);
         const nextPreviews = Array(10).fill(null);
         (data.images || []).slice(0, 10).forEach((image, index) => {
           nextPreviews[index] = image.url;
@@ -91,7 +210,7 @@ export default function AddListing() {
       })
       .catch((loadError) => {
         console.error(loadError);
-        setError("Nepodarilo sa nacitat inzerat.");
+        setError("Nepodarilo sa načítať inzerát.");
       })
       .finally(() => {
         setLoadingListing(false);
@@ -126,10 +245,12 @@ export default function AddListing() {
       const response = isEditMode
         ? await api.post(`/api/vehicles/${id}`, payload)
         : await api.post("/api/vehicles", payload);
-      setSuccess("Inzerát bol vytvorený.");
       setSuccess(isEditMode ? "Inzerát bol upravený." : "Inzerát bol vytvorený.");
       if (!isEditMode) {
         setForm(initialFormState);
+        setBrandChoice("");
+        setModelChoice("");
+        setModels([]);
         setImageSlots(Array(10).fill(null));
         setImagePreviews((prev) => {
           prev.forEach((url) => {
@@ -151,6 +272,9 @@ export default function AddListing() {
       setSubmitting(false);
     }
   };
+
+  const showBrandOther = brandChoice === "other";
+  const showModelOther = modelChoice === "other" || brandChoice === "other";
 
   if (!isAuthenticated) {
     return (
@@ -220,27 +344,85 @@ export default function AddListing() {
 
           <div>
             <label className="block text-sm font-medium mb-1">Značka</label>
-            <input
-              type="text"
-              name="brand_name"
-              value={form.brand_name}
-              onChange={handleChange}
+            <select
+              name="brand_id"
+              value={brandChoice}
+              onChange={handleBrandChange}
               className="w-full border rounded-md px-3 py-2"
               required
-            />
+              disabled={loadingBrands}
+            >
+              <option value="">
+                {loadingBrands ? "Načítavam značky..." : "Vyberte značku"}
+              </option>
+              {brands.map((brand) => (
+                <option key={brand.id} value={String(brand.id)}>
+                  {brand.name}
+                </option>
+              ))}
+              <option value="other">Iná značka</option>
+            </select>
           </div>
+
+          {showBrandOther && (
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Názov značky
+              </label>
+              <input
+                type="text"
+                name="brand_name"
+                value={form.brand_name}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                required
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium mb-1">Model</label>
-            <input
-              type="text"
-              name="model_name"
-              value={form.model_name}
-              onChange={handleChange}
+            <select
+              name="model_id"
+              value={modelChoice}
+              onChange={handleModelChange}
               className="w-full border rounded-md px-3 py-2"
               required
-            />
+              disabled={loadingModels || showBrandOther || !form.brand_id}
+            >
+              <option value="">
+                {showBrandOther
+                  ? "Vyplňte názov modelu"
+                  : loadingModels
+                  ? "Načítavam modely..."
+                  : form.brand_id
+                  ? "Vyberte model"
+                  : "Najprv vyberte značku"}
+              </option>
+              {models.map((model) => (
+                <option key={model.id} value={String(model.id)}>
+                  {model.name}
+                </option>
+              ))}
+              {!showBrandOther && <option value="other">Iný model</option>}
+            </select>
           </div>
+
+          {showModelOther && (
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Názov modelu
+              </label>
+              <input
+                type="text"
+                name="model_name"
+                value={form.model_name}
+                onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2"
+                required
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium mb-1">Rok</label>
@@ -380,7 +562,7 @@ export default function AddListing() {
 
         <div>
           <label className="block text-sm font-medium mb-1">
-            Fotky (poradie 1–10)
+            Fotky (poradie 1-10)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {imageSlots.map((_, index) => (
@@ -432,8 +614,4 @@ export default function AddListing() {
     </div>
   );
 }
-
-
-
-
 

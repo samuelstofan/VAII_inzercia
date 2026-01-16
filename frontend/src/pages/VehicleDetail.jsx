@@ -13,6 +13,7 @@ export default function VehicleDetail() {
   const [currentImage, setCurrentImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
 
   const images = vehicle?.images || [];
@@ -68,6 +69,7 @@ export default function VehicleDetail() {
       .get("/api/user")
       .then((res) => {
         setCurrentUserId(res.data?.id ?? null);
+        setIsAdmin(res.data?.role === "admin");
       })
       .catch((err) => {
         console.error(err);
@@ -219,7 +221,7 @@ export default function VehicleDetail() {
           </p>
 
           <div className="vehicle-detail__specs">
-            <div><strong>Znacka:</strong> {vehicle.brand.name}</div>
+            <div><strong>Značka:</strong> {vehicle.brand.name}</div>
             <div><strong>Model:</strong> {vehicle.model.name}</div>
             <div><strong>Rok:</strong> {vehicle.year}</div>
             <div><strong>Nájazd:</strong> {vehicle.mileage.toLocaleString()} km</div>
@@ -230,13 +232,13 @@ export default function VehicleDetail() {
           </div>
           <div className="mt-4 border-t pt-4">
             <h3 className="text-lg font-semibold mb-2">Kontakt</h3>
-            {(vehicle.user?.email || vehicle.user?.phone) ? (
+            {vehicle.user?.email || vehicle.user?.phone ? (
               <button
                 type="button"
                 onClick={() => setContactOpen(true)}
                 className="inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-md"
               >
-                Kontaktovat predajcu
+                Kontaktovať predajcu
               </button>
             ) : (
               <p className="text-sm text-gray-600">
@@ -255,22 +257,29 @@ export default function VehicleDetail() {
         </pre>
       </div>
 
-      {isAuthenticated && currentUserId === vehicle.user?.id && (
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={handleEditListing}
-            className="bg-gray-200 text-gray-800 px-5 py-2 rounded-md"
-          >
-            Upraviť inzerát
-          </button>
-          <button
-            type="button"
-            onClick={handleDeleteListing}
-            className="bg-red-600 text-white px-5 py-2 rounded-md"
-          >
-            Odstrániť inzerát
-          </button>
+      {isAuthenticated && (currentUserId === vehicle.user?.id || isAdmin) && (
+        <div className="mt-6 flex flex-col items-end gap-2">
+          {isAdmin && currentUserId !== vehicle.user?.id && (
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Admin režim
+            </span>
+          )}
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={handleEditListing}
+              className="bg-gray-200 text-gray-800 px-5 py-2 rounded-md"
+            >
+              Upraviť inzerát
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteListing}
+              className="bg-red-600 text-white px-5 py-2 rounded-md"
+            >
+              Odstrániť inzerát
+            </button>
+          </div>
         </div>
       )}
 
@@ -339,10 +348,10 @@ export default function VehicleDetail() {
               className="absolute left-5 text-white text-5xl"
             >
               <img
-                  src="/chevron-left.svg"
-                  alt="Previous"
-                  className="vehicle-detail__nav-icon"
-                />
+                src="/chevron-left.svg"
+                alt="Previous"
+                className="vehicle-detail__nav-icon"
+              />
             </button>
           )}
 
@@ -375,6 +384,3 @@ export default function VehicleDetail() {
     </div>
   );
 }
-
-
-

@@ -13,6 +13,10 @@ import MyAccount from "./pages/MyAccount";
 import VehicleDetail from "./pages/VehicleDetail";
 import Favorites from "./pages/Favorites";
 import Messages from "./pages/Messages";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Faq from "./pages/Faq";
+import AdminUsers from "./pages/AdminUsers";
 
 export default function App() {
   return (
@@ -33,6 +37,10 @@ export default function App() {
           <Route path="/oblubene" element={<Favorites />} />
           <Route path="/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/spravy" element={<Messages />} />
+          <Route path="/o-nas" element={<About />} />
+          <Route path="/kontakt" element={<Contact />} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/admin/uzivatelia" element={<AdminUsers />} />
         </Routes>
       </main>
 
