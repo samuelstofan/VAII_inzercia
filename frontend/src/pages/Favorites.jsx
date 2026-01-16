@@ -2,10 +2,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import ListingCard from "../components/ListingCard";
 
 export default function Favorites() {
   const { isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [listings, setListings] = useState([]);
@@ -24,29 +26,29 @@ export default function Favorites() {
         setListings(res.data.data || []);
       } catch (err) {
         console.error(err);
-        setError("Nepodarilo sa načítať obľúbené inzeráty.");
+        setError(t("favorites.error"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchFavorites();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, t]);
 
-  if (loading) return <div className="p-6">Loading favorites...</div>;
+  if (loading) return <div className="p-6">{t("favorites.loading")}</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Obľúbené inzeráty</h1>
+        <h1 className="text-2xl font-bold">{t("favorites.title")}</h1>
         <Link to="/" className="text-blue-600">
-          Späť na domovskú stránku
+          {t("common.backHome")}
         </Link>
       </div>
 
       {listings.length === 0 ? (
-        <p className="text-gray-600">Žiadne obľúbené inzeráty.</p>
+        <p className="text-gray-600">{t("favorites.empty")}</p>
       ) : (
         <div className="flex flex-col gap-5">
           {listings.map((item) => (
@@ -57,10 +59,3 @@ export default function Favorites() {
     </div>
   );
 }
-
-
-
-
-
-
-

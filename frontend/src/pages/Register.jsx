@@ -1,10 +1,11 @@
-﻿import { useState } from "react";
-import api from "../api/axios"; 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Register() {
   const navigate = useNavigate();
-  console.log("ENV FROM VITE:", import.meta.env.VITE_API_URL);
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -15,16 +16,16 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (event) => {
+    setForm({ ...form, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
 
     if (form.password !== form.password_confirmation) {
-      alert("Heslá sa nezhodujú.");
+      alert(t("register.errorPasswordMatch"));
       return;
     }
 
@@ -32,10 +33,9 @@ export default function Register() {
       setLoading(true);
 
       await api.get("/sanctum/csrf-cookie");
-
-      const res = await api.post("/register", form);
-      
+      await api.post("/register", form);
       await api.post("/logout");
+
       navigate("/prihlasenie");
     } catch (err) {
       console.error(err);
@@ -44,9 +44,8 @@ export default function Register() {
         const first = Object.values(err.response.data.errors)[0][0];
         setError(first);
       } else {
-        setError("Registrácia zlyhala.");
+        setError(t("register.errorGeneric"));
       }
-
     } finally {
       setLoading(false);
     }
@@ -54,7 +53,9 @@ export default function Register() {
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-6 text-center">Registrácia</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        {t("register.title")}
+      </h1>
 
       {error && (
         <div className="bg-red-100 text-red-600 p-3 rounded mb-4">
@@ -63,13 +64,12 @@ export default function Register() {
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
         <input
           name="name"
           value={form.name}
           onChange={handleChange}
           className="border rounded-lg px-3 py-2"
-          placeholder="Meno"
+          placeholder={t("register.placeholderName")}
           required
         />
 
@@ -79,7 +79,7 @@ export default function Register() {
           onChange={handleChange}
           className="border rounded-lg px-3 py-2"
           type="email"
-          placeholder="Email"
+          placeholder={t("register.placeholderEmail")}
           required
         />
 
@@ -89,7 +89,7 @@ export default function Register() {
           onChange={handleChange}
           className="border rounded-lg px-3 py-2"
           type="password"
-          placeholder="Heslo"
+          placeholder={t("register.placeholderPassword")}
           required
         />
 
@@ -99,7 +99,7 @@ export default function Register() {
           onChange={handleChange}
           className="border rounded-lg px-3 py-2"
           type="password"
-          placeholder="Potvrdenie hesla"
+          placeholder={t("register.placeholderPasswordConfirm")}
           required
         />
 
@@ -108,12 +108,9 @@ export default function Register() {
           disabled={loading}
           className="bg-blue-500 text-white py-2 rounded-lg disabled:opacity-50"
         >
-          {loading ? "Registrujem..." : "Registrovat"}
+          {loading ? t("register.buttonLoading") : t("register.button")}
         </button>
       </form>
     </div>
   );
 }
-
-
-

@@ -2,9 +2,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function AdminUsers() {
   const { isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -39,17 +41,16 @@ export default function AdminUsers() {
           return;
         }
         setIsAdmin(true);
-
       } catch (err) {
         console.error(err);
-        setError("Nepodarilo sa načítať admin dáta.");
+        setError(t("admin.errorLoad"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, t]);
 
   const handleLoadUsers = async () => {
     if (usersLoaded) {
@@ -65,24 +66,9 @@ export default function AdminUsers() {
       setUsersOpen(true);
     } catch (err) {
       console.error(err);
-      setError("Používateľov sa nepodarilo načítať.");
+      setError(t("admin.errorUsersLoad"));
     } finally {
       setLoadingUsers(false);
-    }
-  };
-
-  const handleDeleteUser = async (userId) => {
-    const confirmed = window.confirm(
-      "Naozaj chcete odstrániť používateľa?"
-    );
-    if (!confirmed) return;
-
-    try {
-      await api.delete(`/api/admin/users/${userId}`);
-      setUsers((prev) => prev.filter((user) => user.id !== userId));
-    } catch (err) {
-      console.error(err);
-      setError("Používateľa sa nepodarilo odstrániť.");
     }
   };
 
@@ -100,7 +86,7 @@ export default function AdminUsers() {
       setBrandsOpen(true);
     } catch (err) {
       console.error(err);
-      setError("Značky sa nepodarilo načítať.");
+      setError(t("admin.errorBrandsLoad"));
     } finally {
       setLoadingBrands(false);
     }
@@ -125,9 +111,22 @@ export default function AdminUsers() {
       }
     } catch (err) {
       console.error(err);
-      setError("Modely sa nepodarilo načítať.");
+      setError(t("admin.errorModelsLoad"));
     } finally {
       setLoadingModels(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    const confirmed = window.confirm(t("admin.confirmDeleteUser"));
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/api/admin/users/${userId}`);
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
+    } catch (err) {
+      console.error(err);
+      setError(t("admin.errorDeleteUser"));
     }
   };
 
@@ -149,7 +148,7 @@ export default function AdminUsers() {
 
   const handleSaveBrand = async (brand) => {
     if (!brand.name.trim()) {
-      setError("Názov značky nemôže byť prázdny.");
+      setError(t("admin.errorEmptyBrand"));
       return;
     }
 
@@ -162,13 +161,13 @@ export default function AdminUsers() {
       );
     } catch (err) {
       console.error(err);
-      setError("Značku sa nepodarilo upraviť.");
+      setError(t("admin.errorUpdateBrand"));
     }
   };
 
   const handleSaveModel = async (model) => {
     if (!model.name.trim()) {
-      setError("Názov modelu nemôže byť prázdny.");
+      setError(t("admin.errorEmptyModel"));
       return;
     }
 
@@ -181,14 +180,12 @@ export default function AdminUsers() {
       );
     } catch (err) {
       console.error(err);
-      setError("Model sa nepodarilo upraviť.");
+      setError(t("admin.errorUpdateModel"));
     }
   };
 
   const handleDeleteBrand = async (brandId) => {
-    const confirmed = window.confirm(
-      "Naozaj chcete odstrániť značku? Zmažú sa aj jej modely a inzeráty."
-    );
+    const confirmed = window.confirm(t("admin.confirmDeleteBrand"));
     if (!confirmed) return;
 
     try {
@@ -202,14 +199,12 @@ export default function AdminUsers() {
       }
     } catch (err) {
       console.error(err);
-      setError("Značku sa nepodarilo odstrániť.");
+      setError(t("admin.errorDeleteBrand"));
     }
   };
 
   const handleDeleteModel = async (modelId) => {
-    const confirmed = window.confirm(
-      "Naozaj chcete odstrániť model? Zmažú sa aj súvisiace inzeráty."
-    );
+    const confirmed = window.confirm(t("admin.confirmDeleteModel"));
     if (!confirmed) return;
 
     try {
@@ -217,12 +212,12 @@ export default function AdminUsers() {
       setModels((prev) => prev.filter((model) => model.id !== modelId));
     } catch (err) {
       console.error(err);
-      setError("Model sa nepodarilo odstrániť.");
+      setError(t("admin.errorDeleteModel"));
     }
   };
 
   if (loading) {
-    return <div className="text-center mt-10">Načítavam...</div>;
+    return <div className="text-center mt-10">{t("admin.loading")}</div>;
   }
 
   if (!isAdmin) {
@@ -238,9 +233,9 @@ export default function AdminUsers() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Admin – správa obsahu</h1>
+        <h1 className="text-3xl font-bold">{t("admin.title")}</h1>
         <Link to="/" className="text-blue-600">
-          Späť na domovskú stránku
+          {t("common.backHome")}
         </Link>
       </div>
 
@@ -248,7 +243,7 @@ export default function AdminUsers() {
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Používatelia</h2>
+          <h2 className="text-2xl font-semibold">{t("admin.users")}</h2>
           <div className="flex gap-2">
             {!usersOpen && (
               <button
@@ -257,7 +252,7 @@ export default function AdminUsers() {
                 className="bg-blue-600 text-white px-4 py-2 rounded-md"
                 disabled={loadingUsers}
               >
-                {loadingUsers ? "Načítavam..." : "Načítať"}
+                {loadingUsers ? t("admin.loading") : t("admin.load")}
               </button>
             )}
             {usersLoaded && usersOpen && (
@@ -266,7 +261,7 @@ export default function AdminUsers() {
                 onClick={() => setUsersOpen(false)}
                 className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md"
               >
-                Zavrieť
+                {t("admin.close")}
               </button>
             )}
           </div>
@@ -275,7 +270,7 @@ export default function AdminUsers() {
         {usersLoaded && usersOpen && (
           <>
             {users.length === 0 ? (
-              <p className="text-gray-600">Žiadni používatelia.</p>
+              <p className="text-gray-600">{t("admin.noUsers")}</p>
             ) : (
               <div className="bg-white rounded-lg shadow divide-y">
                 {users.map((user) => (
@@ -287,12 +282,12 @@ export default function AdminUsers() {
                       <div className="text-lg font-semibold">{user.name}</div>
                       <div className="text-sm text-gray-600">{user.email}</div>
                       <div className="text-xs text-gray-500">
-                        Rola: {user.role}
+                        {t("admin.role")}: {user.role}
                       </div>
                     </div>
                     {user.role === "admin" ? (
                       <span className="text-xs text-gray-500">
-                        Admin účet
+                        {t("admin.adminAccount")}
                       </span>
                     ) : (
                       <button
@@ -300,7 +295,7 @@ export default function AdminUsers() {
                         onClick={() => handleDeleteUser(user.id)}
                         className="bg-red-600 text-white px-4 py-2 rounded-md"
                       >
-                        Odstrániť
+                        {t("admin.delete")}
                       </button>
                     )}
                   </div>
@@ -313,7 +308,7 @@ export default function AdminUsers() {
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Značky</h2>
+          <h2 className="text-2xl font-semibold">{t("admin.brands")}</h2>
           <div className="flex gap-2">
             {!brandsOpen && (
               <button
@@ -322,7 +317,7 @@ export default function AdminUsers() {
                 className="bg-blue-600 text-white px-4 py-2 rounded-md"
                 disabled={loadingBrands}
               >
-                {loadingBrands ? "Načítavam..." : "Načítať"}
+                {loadingBrands ? t("admin.loading") : t("admin.load")}
               </button>
             )}
             {brandsLoaded && brandsOpen && (
@@ -331,7 +326,7 @@ export default function AdminUsers() {
                 onClick={() => setBrandsOpen(false)}
                 className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md"
               >
-                Zavrieť
+                {t("admin.close")}
               </button>
             )}
           </div>
@@ -340,7 +335,7 @@ export default function AdminUsers() {
         {brandsLoaded && brandsOpen && (
           <>
             {brands.length === 0 ? (
-              <p className="text-gray-600">Žiadne značky.</p>
+              <p className="text-gray-600">{t("admin.noBrands")}</p>
             ) : (
               <div className="bg-white rounded-lg shadow divide-y">
                 {brands.map((brand) => (
@@ -362,14 +357,14 @@ export default function AdminUsers() {
                         onClick={() => handleSaveBrand(brand)}
                         className="bg-blue-600 text-white px-4 py-2 rounded-md"
                       >
-                        Uložiť
+                        {t("admin.save")}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteBrand(brand.id)}
                         className="bg-red-600 text-white px-4 py-2 rounded-md"
                       >
-                        Odstrániť
+                        {t("admin.delete")}
                       </button>
                     </div>
                   </div>
@@ -382,7 +377,7 @@ export default function AdminUsers() {
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Modely</h2>
+          <h2 className="text-2xl font-semibold">{t("admin.models")}</h2>
           <div className="flex gap-2">
             {!modelsOpen && (
               <button
@@ -391,7 +386,7 @@ export default function AdminUsers() {
                 className="bg-blue-600 text-white px-4 py-2 rounded-md"
                 disabled={loadingModels}
               >
-                {loadingModels ? "Načítavam..." : "Načítať"}
+                {loadingModels ? t("admin.loading") : t("admin.load")}
               </button>
             )}
             {modelsLoaded && modelsOpen && (
@@ -400,7 +395,7 @@ export default function AdminUsers() {
                 onClick={() => setModelsOpen(false)}
                 className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md"
               >
-                Zavrieť
+                {t("admin.close")}
               </button>
             )}
           </div>
@@ -409,14 +404,16 @@ export default function AdminUsers() {
         {modelsLoaded && modelsOpen && (
           <>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <label className="text-sm text-gray-600">Filtrovať podľa značky</label>
+              <label className="text-sm text-gray-600">
+                {t("admin.filterByBrand")}
+              </label>
               <select
                 value={selectedBrandId}
                 onChange={(event) => setSelectedBrandId(event.target.value)}
                 className="border rounded-md px-3 py-2"
                 disabled={!brandsLoaded || brands.length === 0}
               >
-                <option value="">Všetky značky</option>
+                <option value="">{t("admin.allBrands")}</option>
                 {brands.map((brand) => (
                   <option key={brand.id} value={brand.id}>
                     {brand.name}
@@ -426,7 +423,7 @@ export default function AdminUsers() {
             </div>
 
             {filteredModels.length === 0 ? (
-              <p className="text-gray-600">Žiadne modely.</p>
+              <p className="text-gray-600">{t("admin.noModels")}</p>
             ) : (
               <div className="bg-white rounded-lg shadow divide-y">
                 {filteredModels.map((model) => (
@@ -436,7 +433,7 @@ export default function AdminUsers() {
                   >
                     <div className="w-full sm:max-w-xs">
                       <div className="text-xs text-gray-500 mb-1">
-                        {model.brand?.name || "Neznáma značka"}
+                        {model.brand?.name || t("admin.unknownBrand")}
                       </div>
                       <input
                         type="text"
@@ -453,14 +450,14 @@ export default function AdminUsers() {
                         onClick={() => handleSaveModel(model)}
                         className="bg-blue-600 text-white px-4 py-2 rounded-md"
                       >
-                        Uložiť
+                        {t("admin.save")}
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteModel(model.id)}
                         className="bg-red-600 text-white px-4 py-2 rounded-md"
                       >
-                        Odstrániť
+                        {t("admin.delete")}
                       </button>
                     </div>
                   </div>

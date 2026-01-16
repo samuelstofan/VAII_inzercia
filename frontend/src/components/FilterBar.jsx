@@ -1,4 +1,6 @@
-﻿export default function FilterBar({
+import { useLanguage } from "../context/LanguageContext";
+
+export default function FilterBar({
   filters,
   onChange,
   onReset,
@@ -9,6 +11,7 @@
   sortOption,
   onSortChange,
 }) {
+  const { t } = useLanguage();
   const hasActiveFilters = Object.values(filters).some(
     (value) => String(value).trim() !== ""
   );
@@ -17,14 +20,14 @@
     <div className="max-w-7xl mx-auto px-4 mt-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
-          <label className="text-sm block mb-1">Značka</label>
+          <label className="text-sm block mb-1">{t("filterBar.brand")}</label>
           <select
             name="brand"
             value={filters.brand}
             onChange={onChange}
             className="w-full border rounded-lg px-3 py-2"
           >
-            <option value="">Všetky</option>
+            <option value="">{t("filterBar.all")}</option>
             {brands.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
@@ -34,7 +37,7 @@
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Model</label>
+          <label className="text-sm block mb-1">{t("filterBar.model")}</label>
           <select
             name="model"
             value={filters.model}
@@ -42,7 +45,7 @@
             disabled={!filters.brand}
             className="w-full border rounded-lg px-3 py-2"
           >
-            <option value="">Všetky</option>
+            <option value="">{t("filterBar.all")}</option>
             {models.map((model) => (
               <option key={model} value={model}>
                 {model}
@@ -52,7 +55,9 @@
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Cena od</label>
+          <label className="text-sm block mb-1">
+            {t("filterBar.priceFrom")}
+          </label>
           <input
             type="number"
             name="priceMin"
@@ -65,7 +70,9 @@
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Cena do</label>
+          <label className="text-sm block mb-1">
+            {t("filterBar.priceTo")}
+          </label>
           <input
             type="number"
             name="priceMax"
@@ -78,7 +85,9 @@
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Nájazd od</label>
+          <label className="text-sm block mb-1">
+            {t("filterBar.mileageFrom")}
+          </label>
           <input
             className="w-full border px-3 py-2 rounded-lg"
             name="mileageMin"
@@ -89,7 +98,9 @@
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Nájazd do</label>
+          <label className="text-sm block mb-1">
+            {t("filterBar.mileageTo")}
+          </label>
           <input
             className="w-full border px-3 py-2 rounded-lg"
             name="mileageMax"
@@ -100,7 +111,9 @@
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Rok výroby od</label>
+          <label className="text-sm block mb-1">
+            {t("filterBar.yearFrom")}
+          </label>
           <input
             className="w-full border px-3 py-2 rounded-lg"
             name="yearMin"
@@ -111,7 +124,9 @@
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Rok výroby do</label>
+          <label className="text-sm block mb-1">
+            {t("filterBar.yearTo")}
+          </label>
           <input
             className="w-full border px-3 py-2 rounded-lg"
             name="yearMax"
@@ -122,18 +137,18 @@
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Palivo</label>
+          <label className="text-sm block mb-1">{t("filterBar.fuel")}</label>
           <select
             name="fuel"
             value={filters.fuel}
             onChange={onChange}
             className="w-full border rounded-lg px-3 py-2"
           >
-            <option value="">Všetky</option>
-            <option value="petrol">Benzín</option>
-            <option value="diesel">Nafta</option>
-            <option value="electric">Elektrina</option>
-            <option value="hybrid">Hybrid</option>
+            <option value="">{t("filterBar.all")}</option>
+            <option value="petrol">{t("filterBar.fuelPetrol")}</option>
+            <option value="diesel">{t("filterBar.fuelDiesel")}</option>
+            <option value="electric">{t("filterBar.fuelElectric")}</option>
+            <option value="hybrid">{t("filterBar.fuelHybrid")}</option>
             <option value="lpg">LPG</option>
           </select>
         </div>
@@ -149,12 +164,12 @@
                 : "w-full h-10 bg-gray-200 text-gray-800 px-5 py-2 rounded-lg"
             }
           >
-            Zrušiť filtre
+            {t("filterBar.reset")}
           </button>
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Zoradenie</label>
+          <label className="text-sm block mb-1">{t("filterBar.sort")}</label>
           <select
             name="sortOption"
             value={sortOption}
@@ -162,15 +177,17 @@
             className="w-full border rounded-lg px-3 py-2"
           >
             <option value="az">A-Z</option>
-            <option value="price-asc">Najlacnejšie</option>
-            <option value="price-desc">Najdrahšie</option>
-            <option value="newest">Najnovšie</option>
-            <option value="oldest">Najstaršie</option>
+            <option value="price-asc">{t("filterBar.sortPriceAsc")}</option>
+            <option value="price-desc">{t("filterBar.sortPriceDesc")}</option>
+            <option value="newest">{t("filterBar.sortNewest")}</option>
+            <option value="oldest">{t("filterBar.sortOldest")}</option>
           </select>
         </div>
 
         <div>
-          <label className="text-sm block mb-1">Počet inzerátov</label>
+          <label className="text-sm block mb-1">
+            {t("filterBar.pageSize")}
+          </label>
           <select
             name="pageSize"
             value={pageSize}

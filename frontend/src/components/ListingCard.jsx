@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function ListingCard({ vehicle }) {
+  const { t } = useLanguage();
   const primaryImage =
     vehicle.images?.find((img) => img.is_primary)?.url ||
     vehicle.images?.[0]?.url;
@@ -32,12 +34,12 @@ export default function ListingCard({ vehicle }) {
         <h3 className="font-bold text-xl">{vehicle.title}</h3>
 
         <p className="text-gray-600 text-base">
-          {fuelLabel} - {vehicle.year} - {vehicle.mileage.toLocaleString()} km -{" "}
-          {vehicle.location}
+          {fuelLabel} - {vehicle.year} - {vehicle.mileage.toLocaleString()}{" "}
+          {t("listingCard.km")} - {vehicle.location}
         </p>
 
         <p className="font-semibold mt-2 text-lg">
-          {vehicle.price.toLocaleString()} EUR
+          {vehicle.price.toLocaleString()} {t("listingCard.currency")}
         </p>
       </div>
     </Link>

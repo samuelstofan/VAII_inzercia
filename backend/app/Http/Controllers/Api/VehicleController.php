@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Message;
+use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Models\CarModel;
@@ -337,6 +339,47 @@ class VehicleController extends Controller
             ->paginate(9);
 
         return response()->json($vehicles);
+    }
+
+    /**
+     * POST /api/vehicles/{id}/report
+     */
+    public function report(Request $request, $id)
+    {
+        $vehicle = Vehicle::findOrFail($id);
+
+        $validated = $request->validate([
+            'message' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $authId = $request->user()->id;
+
+        $adminIds = User::query()
+            ->where('role', 'admin')
+            ->where('id', '!=', $authId)
+            ->pluck('id');
+
+        if ($adminIds->isEmpty()) {
+            return response()->json([
+                'message' => 'No admin users available.',
+            ], 422);
+        }
+
+        $messageText = $validated['message'] ?? 'Listing reported.';
+
+        foreach ($adminIds as $adminId) {
+            Message::create([
+                'sender_id' => $authId,
+                'receiver_id' => $adminId,
+                'vehicle_id' => $vehicle->id,
+                'message' => $messageText,
+                'is_read' => false,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Report sent.',
+        ], 201);
     }
 
     /**

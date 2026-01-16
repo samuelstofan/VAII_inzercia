@@ -1,8 +1,10 @@
 ﻿import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Footer() {
   const { isAuthenticated } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
 
   return (
     <footer className="footer-container">
@@ -13,20 +15,20 @@ export default function Footer() {
 
         <div className="footer-grid">
           <div>
-            <h3 className="footer-column-title">O nás</h3>
+            <h3 className="footer-column-title">{t("footer.about")}</h3>
             <p>
-              <Link to="/kontakt">Kontakt</Link>
+              <Link to="/kontakt">{t("footer.contact")}</Link>
             </p>
             <p>
-              <Link to="/o-nas">O nás</Link>
+              <Link to="/o-nas">{t("footer.about")}</Link>
             </p>
           </div>
 
           <div>
-            <h3 className="footer-column-title">Podpora</h3>
-            <p>Nahlásenie inzerátu</p>
+            <h3 className="footer-column-title">{t("footer.support")}</h3>
+            <p>{t("footer.reportListing")}</p>
             <p>
-              <Link to="/faq">FAQ</Link>
+              <Link to="/faq">{t("footer.faq")}</Link>
             </p>
           </div>
 
@@ -36,19 +38,37 @@ export default function Footer() {
                 to="/registracia"
                 className="footer-button footer-button--inverse"
               >
-                Registrovať
+                {t("footer.register")}
               </Link>
               <Link
                 to="/prihlasenie"
-                className="footer-button footer-button--inverse"
+                className="footer-button footer-button--primary"
               >
-                Prihlásiť
+                {t("footer.login")}
               </Link>
             </div>
           )}
         </div>
 
         <div className="footer-socials">
+          <div className="lang-toggle">
+            <button
+              type="button"
+              className={language === "sk" ? "is-active" : ""}
+              onClick={() => setLanguage("sk")}
+              aria-pressed={language === "sk"}
+            >
+              SK
+            </button>
+            <button
+              type="button"
+              className={language === "en" ? "is-active" : ""}
+              onClick={() => setLanguage("en")}
+              aria-pressed={language === "en"}
+            >
+              EN
+            </button>
+          </div>
           <a
             href="https://www.facebook.com"
             target="_blank"

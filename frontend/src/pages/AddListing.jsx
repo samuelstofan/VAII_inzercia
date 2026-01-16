@@ -2,6 +2,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 const initialFormState = {
   title: "",
@@ -24,6 +25,7 @@ const initialFormState = {
 
 export default function AddListing() {
   const { isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = Boolean(id);
@@ -118,7 +120,7 @@ export default function AddListing() {
       .catch((err) => {
         console.error(err);
         if (!isMounted) return;
-        setError("Nepodarilo sa načítať značky.");
+        setError(t("addListing.errorBrands"));
       })
       .finally(() => {
         if (!isMounted) return;
@@ -128,7 +130,7 @@ export default function AddListing() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!form.brand_id) {
@@ -210,12 +212,12 @@ export default function AddListing() {
       })
       .catch((loadError) => {
         console.error(loadError);
-        setError("Nepodarilo sa načítať inzerát.");
+        setError(t("addListing.errorLoad"));
       })
       .finally(() => {
         setLoadingListing(false);
       });
-  }, [id, isAuthenticated, isEditMode]);
+  }, [id, isAuthenticated, isEditMode, t]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -245,7 +247,9 @@ export default function AddListing() {
       const response = isEditMode
         ? await api.post(`/api/vehicles/${id}`, payload)
         : await api.post("/api/vehicles", payload);
-      setSuccess(isEditMode ? "Inzerát bol upravený." : "Inzerát bol vytvorený.");
+      setSuccess(
+        isEditMode ? t("addListing.successEdit") : t("addListing.successCreate")
+      );
       if (!isEditMode) {
         setForm(initialFormState);
         setBrandChoice("");
@@ -266,7 +270,7 @@ export default function AddListing() {
         Object.values(submitError.response?.data?.errors || {})
           .flat()
           .join(", ") ||
-        "Inzerát sa nepodarilo vytvoriť.";
+        t("addListing.errorCreate");
       setError(message);
     } finally {
       setSubmitting(false);
@@ -280,36 +284,34 @@ export default function AddListing() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold">Pridať inzerát</h1>
+          <h1 className="text-3xl font-bold">{t("addListing.loginTitle")}</h1>
           <Link to="/" className="text-blue-600">
-            Späť na domovskú stránku
+            {t("common.backHome")}
           </Link>
         </div>
-        <p className="text-gray-600 mb-6">
-          Na pridanie inzerátu sa prosím prihláste.
-        </p>
+        <p className="text-gray-600 mb-6">{t("addListing.loginText")}</p>
         <Link
           to="/prihlasenie"
           className="inline-block bg-blue-600 text-white px-4 py-2 rounded-md"
         >
-          Prihlásiť sa
+          {t("addListing.loginButton")}
         </Link>
       </div>
     );
   }
 
   if (isEditMode && loadingListing) {
-    return <p className="text-center mt-10">Načítavam...</p>;
+    return <p className="text-center mt-10">{t("addListing.loading")}</p>;
   }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">
-          {isEditMode ? "Zmeniť inzerát" : "Pridať inzerát"}
+          {isEditMode ? t("addListing.titleEdit") : t("addListing.titleAdd")}
         </h1>
         <Link to="/" className="text-blue-600">
-          Späť na domovskú stránku
+          {t("common.backHome")}
         </Link>
       </div>
 
@@ -319,7 +321,9 @@ export default function AddListing() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Názov</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelTitle")}
+            </label>
             <input
               type="text"
               name="title"
@@ -331,7 +335,9 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Lokalita</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelLocation")}
+            </label>
             <input
               type="text"
               name="location"
@@ -343,7 +349,9 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Značka</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelBrand")}
+            </label>
             <select
               name="brand_id"
               value={brandChoice}
@@ -353,21 +361,23 @@ export default function AddListing() {
               disabled={loadingBrands}
             >
               <option value="">
-                {loadingBrands ? "Načítavam značky..." : "Vyberte značku"}
+                {loadingBrands
+                  ? t("addListing.brandLoading")
+                  : t("addListing.brandPlaceholder")}
               </option>
               {brands.map((brand) => (
                 <option key={brand.id} value={String(brand.id)}>
                   {brand.name}
                 </option>
               ))}
-              <option value="other">Iná značka</option>
+              <option value="other">{t("addListing.otherBrand")}</option>
             </select>
           </div>
 
           {showBrandOther && (
             <div>
               <label className="block text-sm font-medium mb-1">
-                Názov značky
+                {t("addListing.labelBrandOther")}
               </label>
               <input
                 type="text"
@@ -381,7 +391,9 @@ export default function AddListing() {
           )}
 
           <div>
-            <label className="block text-sm font-medium mb-1">Model</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelModel")}
+            </label>
             <select
               name="model_id"
               value={modelChoice}
@@ -392,26 +404,28 @@ export default function AddListing() {
             >
               <option value="">
                 {showBrandOther
-                  ? "Vyplňte názov modelu"
+                  ? t("addListing.modelPlaceholderFillBrand")
                   : loadingModels
-                  ? "Načítavam modely..."
+                  ? t("addListing.modelLoading")
                   : form.brand_id
-                  ? "Vyberte model"
-                  : "Najprv vyberte značku"}
+                  ? t("addListing.modelPlaceholder")
+                  : t("addListing.modelPlaceholderSelectBrand")}
               </option>
               {models.map((model) => (
                 <option key={model.id} value={String(model.id)}>
                   {model.name}
                 </option>
               ))}
-              {!showBrandOther && <option value="other">Iný model</option>}
+              {!showBrandOther && (
+                <option value="other">{t("addListing.otherModel")}</option>
+              )}
             </select>
           </div>
 
           {showModelOther && (
             <div>
               <label className="block text-sm font-medium mb-1">
-                Názov modelu
+                {t("addListing.labelModelOther")}
               </label>
               <input
                 type="text"
@@ -425,7 +439,9 @@ export default function AddListing() {
           )}
 
           <div>
-            <label className="block text-sm font-medium mb-1">Rok</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelYear")}
+            </label>
             <input
               type="number"
               name="year"
@@ -439,7 +455,9 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Nájazd</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelMileage")}
+            </label>
             <input
               type="number"
               name="mileage"
@@ -453,7 +471,7 @@ export default function AddListing() {
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Objem motora (cc)
+              {t("addListing.labelEngine")}
             </label>
             <input
               type="number"
@@ -466,7 +484,9 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Výkon (kW)</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelPower")}
+            </label>
             <input
               type="number"
               name="power"
@@ -478,24 +498,26 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Palivo</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelFuel")}
+            </label>
             <select
               name="fuel"
               value={form.fuel}
               onChange={handleChange}
               className="w-full border rounded-md px-3 py-2"
             >
-              <option value="petrol">Benzín</option>
-              <option value="diesel">Nafta</option>
-              <option value="electric">Elektrina</option>
-              <option value="hybrid">Hybrid</option>
-              <option value="lpg">LPG</option>
+              <option value="petrol">{t("addListing.fuelPetrol")}</option>
+              <option value="diesel">{t("addListing.fuelDiesel")}</option>
+              <option value="electric">{t("addListing.fuelElectric")}</option>
+              <option value="hybrid">{t("addListing.fuelHybrid")}</option>
+              <option value="lpg">{t("addListing.fuelLpg")}</option>
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Prevodovka
+              {t("addListing.labelTransmission")}
             </label>
             <select
               name="transmission"
@@ -503,20 +525,26 @@ export default function AddListing() {
               onChange={handleChange}
               className="w-full border rounded-md px-3 py-2"
             >
-              <option value="manual">Manuálna</option>
-              <option value="automatic">Automatická</option>
+              <option value="manual">
+                {t("addListing.transmissionManual")}
+              </option>
+              <option value="automatic">
+                {t("addListing.transmissionAutomatic")}
+              </option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Pohon</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelDrive")}
+            </label>
             <select
               name="drive"
               value={form.drive}
               onChange={handleChange}
               className="w-full border rounded-md px-3 py-2"
             >
-              <option value="">Nezadané</option>
+              <option value="">{t("addListing.driveEmpty")}</option>
               <option value="fwd">FWD</option>
               <option value="rwd">RWD</option>
               <option value="awd">AWD</option>
@@ -524,7 +552,9 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Cena</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelPrice")}
+            </label>
             <input
               type="number"
               name="price"
@@ -537,7 +567,9 @@ export default function AddListing() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Mena</label>
+            <label className="block text-sm font-medium mb-1">
+              {t("addListing.labelCurrency")}
+            </label>
             <input
               type="text"
               name="currency"
@@ -550,7 +582,9 @@ export default function AddListing() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Popis</label>
+          <label className="block text-sm font-medium mb-1">
+            {t("addListing.labelDescription")}
+          </label>
           <textarea
             name="description"
             value={form.description}
@@ -562,7 +596,7 @@ export default function AddListing() {
 
         <div>
           <label className="block text-sm font-medium mb-1">
-            Fotky (poradie 1-10)
+            {t("addListing.labelPhotos")}
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {imageSlots.map((_, index) => (
@@ -574,11 +608,13 @@ export default function AddListing() {
                 {imagePreviews[index] ? (
                   <img
                     src={imagePreviews[index]}
-                    alt={`Náhľad ${index + 1}`}
+                    alt={`${t("addListing.labelPhotos")} ${index + 1}`}
                     className="h-16 w-24 object-cover rounded"
                   />
                 ) : (
-                  <span className="text-gray-500">Vybrať fotku</span>
+                  <span className="text-gray-500">
+                    {t("addListing.photoChoose")}
+                  </span>
                 )}
                 <input
                   type="file"
@@ -587,7 +623,9 @@ export default function AddListing() {
                   className="hidden"
                 />
                 {imagePreviews[index] && (
-                  <span className="text-blue-600 text-xs">Nahradiť</span>
+                  <span className="text-blue-600 text-xs">
+                    {t("addListing.photoReplace")}
+                  </span>
                 )}
               </label>
             ))}
@@ -604,14 +642,13 @@ export default function AddListing() {
             className="bg-blue-600 text-white px-5 py-2 rounded-md disabled:opacity-60"
           >
             {submitting
-              ? "Ukladám..."
+              ? t("addListing.submitting")
               : isEditMode
-              ? "Upraviť inzerát"
-              : "Vytvoriť inzerát"}
+              ? t("addListing.submitEdit")
+              : t("addListing.submitCreate")}
           </button>
         </div>
       </form>
     </div>
   );
 }
-

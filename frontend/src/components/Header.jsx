@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-
   const { isAuthenticated, logout } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -29,41 +30,36 @@ export default function Header() {
     <header className="header-container">
       <div className="inner">
         <Link to="/" className="logo-link">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="logo-img w-48 h-auto"
-          />
+          <img src="/logo.png" alt="Logo" className="logo-img w-48 h-auto" />
         </Link>
 
         {/* DESKTOP MENU */}
         <nav className="desktop-menu">
-          <Link to="/pridat-inzerat">Pridať inzerát</Link>
-
-          <Link to="/predajcovia">Zoznam predajcov</Link>
+          <Link to="/pridat-inzerat">{t("header.addListing")}</Link>
+          <Link to="/predajcovia">{t("header.sellers")}</Link>
 
           {isAuthenticated && (
-            <Link to="/oblubene">Obľúbené inzeráty</Link>
+            <Link to="/oblubene">{t("header.favorites")}</Link>
           )}
 
           {isAuthenticated ? (
             <>
-              <Link to="/spravy">Správy</Link>
-              <Link to="/moj-ucet">Môj účet</Link>
-              {isAdmin && <Link to="/admin/uzivatelia">Admin</Link>}
+              <Link to="/spravy">{t("header.messages")}</Link>
+              <Link to="/moj-ucet">{t("header.myAccount")}</Link>
+              {isAdmin && <Link to="/admin/uzivatelia">{t("header.admin")}</Link>}
             </>
           ) : (
-            <Link to="/registracia">Registrácia</Link>
+            <Link to="/registracia">{t("header.register")}</Link>
           )}
         </nav>
 
         {!isAuthenticated ? (
           <Link to="/prihlasenie" className="desktop-btn login">
-            Prihlásiť
+            {t("header.login")}
           </Link>
         ) : (
           <button onClick={() => logout()} className="desktop-btn logout">
-            Odhlásiť
+            {t("header.logout")}
           </button>
         )}
 
@@ -77,30 +73,30 @@ export default function Header() {
       {open && (
         <div className="mobile-menu">
           <Link to="/pridat-inzerat" onClick={() => setOpen(false)}>
-            Pridať inzerát
+            {t("header.addListing")}
           </Link>
 
           <Link to="/predajcovia" onClick={() => setOpen(false)}>
-            Zoznam predajcov
+            {t("header.sellers")}
           </Link>
 
           {isAuthenticated && (
             <Link to="/oblubene" onClick={() => setOpen(false)}>
-              Obľúbené inzeráty
+              {t("header.favorites")}
             </Link>
           )}
 
           {isAuthenticated ? (
             <>
               <Link to="/spravy" onClick={() => setOpen(false)}>
-                Správy
+                {t("header.messages")}
               </Link>
               <Link to="/moj-ucet" onClick={() => setOpen(false)}>
-                Môj účet
+                {t("header.myAccount")}
               </Link>
               {isAdmin && (
                 <Link to="/admin/uzivatelia" onClick={() => setOpen(false)}>
-                  Admin
+                  {t("header.admin")}
                 </Link>
               )}
 
@@ -111,13 +107,13 @@ export default function Header() {
                 }}
                 className="logout-btn"
               >
-                Odhlásiť
+                {t("header.logout")}
               </button>
             </>
           ) : (
             <>
               <Link to="/registracia" onClick={() => setOpen(false)}>
-                Registrácia
+                {t("header.register")}
               </Link>
 
               <Link
@@ -125,10 +121,11 @@ export default function Header() {
                 className="login-btn"
                 onClick={() => setOpen(false)}
               >
-                Prihlásiť
+                {t("header.login")}
               </Link>
             </>
           )}
+
         </div>
       )}
     </header>

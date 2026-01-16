@@ -1,8 +1,10 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Sellers() {
+  const { t } = useLanguage();
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -14,28 +16,29 @@ export default function Sellers() {
         setSellers(res.data);
       } catch (err) {
         console.error(err);
-        setError("Nepodarilo sa načítať zoznam predajcov.");
+        setError(t("sellers.errorLoad"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchSellers();
-  }, []);
+  }, [t]);
 
-  if (loading) return <div className="p-6">Načítavam zoznam predajcov...</div>;
+  if (loading) return <div className="p-6">{t("sellers.loading")}</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
     <div className="max-w-2xl mx-auto p-6">
       <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold">Zoznam predajcov</h1>
-          <Link to="/" className="text-blue-600">
-            Späť na domovskú stránku
-          </Link>
+        <h1 className="text-3xl font-bold">{t("sellers.title")}</h1>
+        <Link to="/" className="text-blue-600">
+          {t("common.backHome")}
+        </Link>
       </div>
+
       {sellers.length === 0 ? (
-        <p className="text-gray-600">Zatiaľ tu nie sú žiadni registrovaní predajcovia.</p>
+        <p className="text-gray-600">{t("sellers.empty")}</p>
       ) : (
         <div className="space-y-4">
           {sellers.map((seller) => (
@@ -49,10 +52,11 @@ export default function Sellers() {
                 to={`/predajcovia/${seller.id}`}
                 className="inline-block mt-3 text-blue-600"
               >
-                Inzeráty predajcu
+                {t("sellers.listingsLink")}
               </Link>
               <p className="text-sm text-gray-500">
-                Registrovaný: {new Date(seller.created_at).toLocaleDateString()}
+                {t("sellers.registeredLabel")}{" "}
+                {new Date(seller.created_at).toLocaleDateString()}
               </p>
             </div>
           ))}
@@ -61,6 +65,3 @@ export default function Sellers() {
     </div>
   );
 }
-
-
-

@@ -1,24 +1,24 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function MyAccount() {
-  const { isAuthenticated, logout } = useAuth(); 
+  const { isAuthenticated, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState("");
-
   const [deleting, setDeleting] = useState(false);
-
-  // === NEW ===
   const [isSeller, setIsSeller] = useState(false);
   const [savingSeller, setSavingSeller] = useState(false);
 
@@ -34,27 +34,25 @@ export default function MyAccount() {
         setUser(res.data);
         setNewName(res.data.name);
         setNewPhone(res.data.phone ?? "");
-
         setIsSeller(res.data.is_seller ?? false);
-
       } catch (err) {
         console.error(err);
-        setError("Nepodarilo sa načítať údaje používateľa.");
+        setLoadError(t("myAccount.errorLoad"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, t]);
 
-  const handleNameChange = async (e) => {
-    e.preventDefault();
-    setError("");
+  const handleNameChange = async (event) => {
+    event.preventDefault();
+    setFormError("");
     setSuccess("");
 
     if (!newName.trim()) {
-      setError("Meno nemôže byť prázdne.");
+      setFormError(t("myAccount.errorEmptyName"));
       return;
     }
 
@@ -67,19 +65,18 @@ export default function MyAccount() {
       });
 
       setUser(res.data.user);
-      setSuccess("Meno bolo úspešne zmenené.");
+      setSuccess(t("myAccount.successName"));
     } catch (err) {
       console.error(err);
-      setError("Meno sa nepodarilo zmenit.");
+      setFormError(t("myAccount.errorUpdate"));
     } finally {
       setSaving(false);
     }
   };
 
-  // === NEW ===
   const handleSellerToggle = async () => {
     setSavingSeller(true);
-    setError("");
+    setFormError("");
     setSuccess("");
 
     try {
@@ -89,166 +86,176 @@ export default function MyAccount() {
 
       setUser(res.data.user);
       setIsSeller(res.data.user.is_seller);
-      setSuccess("Nastavenie predajcu bolo aktualizované.");
-
+      setSuccess(t("myAccount.successSeller"));
     } catch (err) {
       console.error(err);
-      setError("Nepodarilo sa upraviť mód predajcu.");
+      setFormError(t("myAccount.errorSeller"));
     } finally {
       setSavingSeller(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    const confirmDelete = window.confirm(
-      "Naozaj chcete vymazať svoj účet? Táto akcia je nevratná."
-    );
-
+    const confirmDelete = window.confirm(t("myAccount.confirmDelete"));
     if (!confirmDelete) return;
 
     try {
       setDeleting(true);
 
-      await api.post("/logout"); 
-      logout(); 
-
+      await api.post("/logout");
+      logout();
       await api.delete("/api/user/delete");
 
-      alert("Váš účet bol úspešne vymazaný.");
+      alert(t("myAccount.alertDeleted"));
       navigate("/");
     } catch (err) {
       console.error(err);
-      alert("Nastala chyba pri vymazávaní účtu.");
+      alert(t("myAccount.alertDeleteError"));
     } finally {
       setDeleting(false);
     }
   };
 
-  if (loading) return <div className="text-center mt-10">Načítavam údaje...</div>;
-  if (error) return <div className="text-center text-red-600 mt-10">{error}</div>;
-  if (!user) return <div className="text-center mt-10">Údaje používateľa nie sú dostupné.</div>;
+  if (loading) {
+    return <div className="text-center mt-10">{t("myAccount.loading")}</div>;
+  }
+
+  if (loadError) {
+    return <div className="text-center text-red-600 mt-10">{loadError}</div>;
+  }
+
+  if (!user) {
+    return <div className="text-center mt-10">{t("myAccount.userMissing")}</div>;
+  }
 
   return (
     <div className="max-w-lg mx-auto mt-10">
       <div className="flex items-center justify-end mb-2">
         <Link to="/" className="text-blue-600">
-          Späť na domovskú stránku
+          {t("common.backHome")}
         </Link>
       </div>
+
       <div className="bg-white p-8 rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-6 text-center">Môj účet</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          {t("myAccount.title")}
+        </h1>
 
-      <div className="space-y-4 text-lg">
+        <div className="space-y-4 text-lg">
+          <div>
+            <strong>{t("myAccount.nameLabel")}</strong>
+            <p>{user.name}</p>
+          </div>
 
-        <div>
-          <strong>Meno:</strong>
-          <p>{user.name}</p>
+          <div>
+            <strong>{t("myAccount.emailLabel")}</strong>
+            <p>{user.email}</p>
+          </div>
+
+          <div>
+            <strong>{t("myAccount.phoneLabel")}</strong>
+            <p>{user.phone || "-"}</p>
+          </div>
+
+          <div>
+            <strong>{t("myAccount.createdAtLabel")}</strong>
+            <p>{new Date(user.created_at).toLocaleString()}</p>
+          </div>
+
+          <div>
+            <strong>{t("myAccount.accountTypeLabel")}</strong>
+            <p className={isSeller ? "text-green-700" : "text-gray-600"}>
+              {isSeller
+                ? t("myAccount.accountTypeSeller")
+                : t("myAccount.accountTypeUser")}
+            </p>
+          </div>
         </div>
 
-        <div>
-          <strong>Email:</strong>
-          <p>{user.email}</p>
-        </div>
-        <div>
-          <strong>Telefón:</strong>
-          <p>{user.phone || "-"}</p>
-        </div>
+        <hr className="my-6" />
 
-        <div>
-          <strong>Dátum vytvorenia účtu:</strong>
-          <p>{new Date(user.created_at).toLocaleString()}</p>
-        </div>
-
-        {/* === NEW === */}
-        <div>
-          <strong>Typ účtu:</strong>
-          <p className={isSeller ? "text-green-700" : "text-gray-600"}>
-            {isSeller ? "Registrovaný predajca" : "Bežný používateľ"}
-          </p>
-        </div>
-
-      </div>
-
-      <hr className="my-6" />
-
-      <h2 className="text-xl font-semibold mb-3">Zmena údajov</h2>
-
-      {success && <p className="text-green-600 mb-3">{success}</p>}
-      {error && <p className="text-red-600 mb-3">{error}</p>}
-
-      <form onSubmit={handleNameChange} className="flex flex-col gap-3">
-        <label className="text-sm text-gray-600">Telefón</label>
-        <input
-          type="tel"
-          value={newPhone}
-          onChange={(e) => setNewPhone(e.target.value)}
-          className="border px-3 py-2 rounded"
-          placeholder="+421..."
-        />
-        <label className="text-sm text-gray-600">Meno</label>
-        <input
-          type="text"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          className="border px-3 py-2 rounded"
-        />
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="bg-black text-white py-2 rounded disabled:opacity-50"
-        >
-          {saving ? "Ukladám..." : "Uložiť"}
-        </button>
-      </form>
-
-      <hr className="my-6" />
-
-      {/* === NEW === */}
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-3">Režim predajcu</h2>
-        <p className="text-gray-700 mb-2">
-          Aktivovaním sa zobrazíte v zozname predajcov.
-        </p>
-
-        <button
-          onClick={handleSellerToggle}
-          disabled={savingSeller}
-          className="bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50"
-        >
-          {savingSeller
-            ? "Ukladám..."
-            : isSeller
-              ? "Vypnúť režim predajcu"
-              : "Stať sa registrovaným predajcom"}
-        </button>
-      </div>
-
-      <hr className="my-6" />
-
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold text-red-600 mb-3">
-          Vymazať účet
+        <h2 className="text-xl font-semibold mb-3">
+          {t("myAccount.sectionEditTitle")}
         </h2>
 
-        <p className="mb-3 text-gray-700">
-          Po vymazaní účtu budú všetky údaje nenávratne odstránené.
-        </p>
+        {success && <p className="text-green-600 mb-3">{success}</p>}
+        {formError && <p className="text-red-600 mb-3">{formError}</p>}
 
-        <button
-          onClick={handleDeleteAccount}
-          disabled={deleting}
-          className="bg-red-600 text-white py-2 px-4 rounded disabled:opacity-50"
-        >
-          {deleting ? "Mažem účet..." : "Vymazat Môj účet"}
-        </button>
-      </div>
+        <form onSubmit={handleNameChange} className="flex flex-col gap-3">
+          <label className="text-sm text-gray-600">
+            {t("myAccount.formPhoneLabel")}
+          </label>
+          <input
+            type="tel"
+            value={newPhone}
+            onChange={(event) => setNewPhone(event.target.value)}
+            className="border px-3 py-2 rounded"
+            placeholder="+421..."
+          />
+          <label className="text-sm text-gray-600">
+            {t("myAccount.formNameLabel")}
+          </label>
+          <input
+            type="text"
+            value={newName}
+            onChange={(event) => setNewName(event.target.value)}
+            className="border px-3 py-2 rounded"
+          />
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="bg-black text-white py-2 rounded disabled:opacity-50"
+          >
+            {saving ? t("myAccount.saving") : t("myAccount.save")}
+          </button>
+        </form>
+
+        <hr className="my-6" />
+
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-3">
+            {t("myAccount.sellerModeTitle")}
+          </h2>
+          <p className="text-gray-700 mb-2">
+            {t("myAccount.sellerModeDescription")}
+          </p>
+
+          <button
+            onClick={handleSellerToggle}
+            disabled={savingSeller}
+            className="bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50"
+          >
+            {savingSeller
+              ? t("myAccount.sellerModeSaving")
+              : isSeller
+                ? t("myAccount.sellerModeDisable")
+                : t("myAccount.sellerModeEnable")}
+          </button>
+        </div>
+
+        <hr className="my-6" />
+
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold text-red-600 mb-3">
+            {t("myAccount.deleteTitle")}
+          </h2>
+
+          <p className="mb-3 text-gray-700">
+            {t("myAccount.deleteDescription")}
+          </p>
+
+          <button
+            onClick={handleDeleteAccount}
+            disabled={deleting}
+            className="bg-red-600 text-white py-2 px-4 rounded disabled:opacity-50"
+          >
+            {deleting
+              ? t("myAccount.deleteButtonLoading")
+              : t("myAccount.deleteButton")}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-
-
-
-
-

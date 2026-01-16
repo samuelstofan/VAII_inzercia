@@ -2,6 +2,7 @@
 import FilterBar from "../components/FilterBar";
 import ListingCard from "../components/ListingCard";
 import Pagination from "../components/Pagination";
+import { useLanguage } from "../context/LanguageContext";
 
 const initialFilters = {
   brand: "",
@@ -16,6 +17,7 @@ const initialFilters = {
 };
 
 export default function Home() {
+  const { t } = useLanguage();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState(initialFilters);
@@ -197,10 +199,10 @@ export default function Home() {
           needsBottomGap ? "mb-16" : ""
         }`}
       >
-        {loading && <p>Načítavam inzeráty...</p>}
+        {loading && <p>{t("home.loading")}</p>}
 
         {!loading && sortedListings.length === 0 && (
-          <p>Žiadne inzeráty neboli nájdené</p>
+          <p>{t("home.empty")}</p>
         )}
 
         {paginatedListings.map((item) => (

@@ -1,11 +1,13 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth(); 
+  const { login } = useAuth();
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -14,23 +16,21 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (event) => {
+    setForm({ ...form, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
 
     try {
       setLoading(true);
 
       await api.get("/sanctum/csrf-cookie");
-
-      const res = await api.post("/login", form);
+      await api.post("/login", form);
 
       login();
-
       navigate("/");
     } catch (err) {
       console.error(err);
@@ -39,9 +39,9 @@ export default function Login() {
         const first = Object.values(err.response.data.errors)[0][0];
         setError(first);
       } else if (err.response?.status === 422) {
-        setError("Nesprávny email alebo heslo.");
+        setError(t("login.errorInvalid"));
       } else {
-        setError("Prihlásenie zlyhalo.");
+        setError(t("login.errorGeneric"));
       }
     } finally {
       setLoading(false);
@@ -50,11 +50,11 @@ export default function Login() {
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-6 text-center">Prihlásenie</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        {t("login.title")}
+      </h1>
 
-      {error && (
-        <div className="text-red-600 text-center mb-4">{error}</div>
-      )}
+      {error && <div className="text-red-600 text-center mb-4">{error}</div>}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
@@ -63,7 +63,7 @@ export default function Login() {
           onChange={handleChange}
           type="email"
           className="border rounded-lg px-3 py-2"
-          placeholder="Email"
+          placeholder={t("login.placeholderEmail")}
           required
         />
 
@@ -73,7 +73,7 @@ export default function Login() {
           onChange={handleChange}
           type="password"
           className="border rounded-lg px-3 py-2"
-          placeholder="Heslo"
+          placeholder={t("login.placeholderPassword")}
           required
         />
 
@@ -82,11 +82,9 @@ export default function Login() {
           disabled={loading}
           className="bg-black text-white py-2 rounded-lg disabled:opacity-50"
         >
-          {loading ? "Prihlasujem..." : "Prihlásiť"}
+          {loading ? t("login.buttonLoading") : t("login.button")}
         </button>
       </form>
     </div>
   );
 }
-
-

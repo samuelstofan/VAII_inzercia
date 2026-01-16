@@ -28,6 +28,7 @@ Route::get('/vehicles', [VehicleController::class, 'index']);
 Route::get('/vehicles/{id}', [VehicleController::class, 'show']);
 Route::middleware('auth:sanctum')->post('/vehicles', [VehicleController::class, 'store']);
 Route::middleware('auth:sanctum')->put('/vehicles/{id}', [VehicleController::class, 'update']);
+Route::middleware('auth:sanctum')->post('/vehicles/{id}/report', [VehicleController::class, 'report']);
 Route::middleware('auth:sanctum')->delete('/vehicles/{id}', [VehicleController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->get('/favorites', [FavoriteController::class, 'index']);

@@ -1,10 +1,12 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../api/axios";
 import ListingCard from "../components/ListingCard";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function SellerListings() {
   const { id } = useParams();
+  const { t } = useLanguage();
   const [seller, setSeller] = useState(null);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,7 @@ export default function SellerListings() {
       } catch (err) {
         console.error(err);
         if (!isMounted) return;
-        setError("Nepodarilo sa načítať Inzeráty predajcu.");
+        setError(t("sellerListings.errorLoad"));
       } finally {
         if (!isMounted) return;
         setLoading(false);
@@ -39,19 +41,20 @@ export default function SellerListings() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, t]);
 
-  if (loading) return <div className="p-6">Načítavam inzeráty...</div>;
+  if (loading) return <div className="p-6">{t("sellerListings.loading")}</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex flex-col gap-2 mb-6">
         <Link to="/predajcovia" className="text-blue-600">
-          Naspäť na zoznam predajcov
+          {t("sellerListings.backToSellers")}
         </Link>
         <h1 className="text-2xl font-bold">
-          Inzeráty predajcu {seller?.name || "seller"}
+          {t("sellerListings.title")}{" "}
+          {seller?.name || t("sellerListings.unknownSeller")}
         </h1>
         {seller?.email && (
           <p className="text-sm text-gray-600">{seller.email}</p>
@@ -59,7 +62,7 @@ export default function SellerListings() {
       </div>
 
       {listings.length === 0 ? (
-        <p className="text-gray-600">Pre tohto predajcu neboli nájdené žiadne inzeráty.</p>
+        <p className="text-gray-600">{t("sellerListings.empty")}</p>
       ) : (
         <div className="flex flex-col gap-5">
           {listings.map((item) => (
@@ -70,5 +73,3 @@ export default function SellerListings() {
     </div>
   );
 }
-
-

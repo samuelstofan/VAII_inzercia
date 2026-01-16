@@ -1,8 +1,8 @@
-﻿export default function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-}) {
+import { useLanguage } from "../context/LanguageContext";
+
+export default function Pagination({ currentPage, totalPages, onPageChange }) {
+  const { t } = useLanguage();
+
   if (!totalPages || totalPages <= 1) {
     return null;
   }
@@ -43,7 +43,7 @@
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
-        Predošlá
+        {t("pagination.previous")}
       </button>
 
       {items.map((item) => {
@@ -78,10 +78,8 @@
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
-        Ďalšia
+        {t("pagination.next")}
       </button>
     </div>
   );
 }
-
-
