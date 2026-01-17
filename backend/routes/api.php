@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\AdminBrandController;
 use App\Http\Controllers\Api\AdminModelController;
+use App\Http\Controllers\Api\FeatureController;
 
 Route::middleware(['auth:sanctum'])->get('/user', [UserController::class, 'getUser']);
 
@@ -23,6 +24,7 @@ Route::get('/sellers/{id}/vehicles', [VehicleController::class, 'bySeller']);
 
 Route::get('/brands', [BrandController::class, 'index']);
 Route::get('/brands/{id}/models', [BrandController::class, 'models']);
+Route::get('/features', [FeatureController::class, 'index']);
 
 Route::get('/vehicles', [VehicleController::class, 'index']);
 Route::get('/vehicles/{id}', [VehicleController::class, 'show']);

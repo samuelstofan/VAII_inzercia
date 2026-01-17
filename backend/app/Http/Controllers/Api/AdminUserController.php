@@ -19,7 +19,7 @@ class AdminUserController extends Controller
 
         return response()->json(
             User::query()
-                ->select(['id', 'name', 'email', 'role', 'created_at'])
+                ->select(['id', 'name', 'email', 'role_id', 'created_at'])
                 ->orderByDesc('created_at')
                 ->get()
         );

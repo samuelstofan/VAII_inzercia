@@ -22,10 +22,53 @@ export default function VehicleDetail() {
   const [reportMessage, setReportMessage] = useState("");
 
   const images = vehicle?.images || [];
-  const fuelLabel = vehicle?.fuel?.label || vehicle?.fuel?.code || "";
+  const features = vehicle?.features || [];
+  const fuelCode = vehicle?.fuel?.code || "";
+  const transmissionCode = vehicle?.transmission?.code || "";
+  const featureLabelMap = {
+    tempomat: "feature.cruiseControl",
+    "adaptivny tempomat": "feature.adaptiveCruiseControl",
+    "stresne okno": "feature.sunroof",
+    klimatizacia: "feature.airConditioning",
+    "automaticka klimatizacia": "feature.autoClimate",
+    "parkovacie senzory": "feature.parkingSensors",
+    "parkovacia kamera": "feature.parkingCamera",
+    navigacia: "feature.navigation",
+    bluetooth: "feature.bluetooth",
+    "android auto": "feature.androidAuto",
+    "apple carplay": "feature.appleCarPlay",
+    "vyhrievane sedadla": "feature.heatedSeats",
+    "kozeny interier": "feature.leatherInterior",
+    "led svetla": "feature.ledLights",
+    "xenonove svetla": "feature.xenonLights",
+    "elektricke okna": "feature.powerWindows",
+    "elektricke spatne zrkadla": "feature.powerMirrors",
+    "asistent rozjazdu do kopca": "feature.hillStartAssist",
+    "sledovanie mrtveho uhla": "feature.blindSpot",
+    "bezklicove startovanie": "feature.keylessStart",
+    "head-up displej": "feature.headUpDisplay",
+    "tazne zariadenie": "feature.towBar",
+  };
+  const fuelLabel =
+    {
+      petrol: t("addListing.fuelPetrol"),
+      diesel: t("addListing.fuelDiesel"),
+      electric: t("addListing.fuelElectric"),
+      hybrid: t("addListing.fuelHybrid"),
+      lpg: t("addListing.fuelLpg"),
+    }[fuelCode] || vehicle?.fuel?.label || fuelCode || "";
   const transmissionLabel =
-    vehicle?.transmission?.label || vehicle?.transmission?.code || "";
-  const driveLabel = vehicle?.drive?.label || vehicle?.drive?.code || "";
+    {
+      manual: t("addListing.transmissionManual"),
+      automatic: t("addListing.transmissionAutomatic"),
+    }[transmissionCode] || vehicle?.transmission?.label || transmissionCode || "";
+  const driveCode = vehicle?.drive?.code || "";
+  const driveLabel =
+    {
+      fwd: t("drive.fwd"),
+      rwd: t("drive.rwd"),
+      awd: t("drive.awd"),
+    }[driveCode] || vehicle?.drive?.label || driveCode || "";
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -313,6 +356,29 @@ export default function VehicleDetail() {
           </div>
         </div>
       </div>
+
+      {features.length > 0 && (
+        <div className="vehicle-detail__features">
+          <h2 className="vehicle-detail__section-title">
+            {t("vehicleDetail.featuresTitle")}
+          </h2>
+          <ul className="vehicle-detail__features-list">
+            {features.map((feature) => {
+              const featureKey =
+                featureLabelMap[String(feature.name || "").toLowerCase()];
+              const featureLabel = featureKey
+                ? t(featureKey)
+                : feature.name;
+              return (
+                <li key={feature.id} className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-blue-600" />
+                  <span>{featureLabel}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       <div className="vehicle-detail__description">
         <h2 className="vehicle-detail__section-title">

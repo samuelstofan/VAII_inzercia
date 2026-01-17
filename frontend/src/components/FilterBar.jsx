@@ -194,6 +194,7 @@ export default function FilterBar({
             onChange={onPageSizeChange}
             className="w-full border rounded-lg px-3 py-2"
           >
+            <option value="1">1</option>
             <option value="2">2</option>
             <option value="4">4</option>
             <option value="8">8</option>

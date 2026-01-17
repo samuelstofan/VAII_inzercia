@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Vehicle;
+use App\Models\Role;
 
 class User extends Authenticatable
 {
@@ -24,7 +25,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'is_seller',
-        'role',
+        'role_id',
     ];
 
     /**
@@ -35,6 +36,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $appends = [
+        'role',
     ];
 
     /**
@@ -55,6 +60,18 @@ class User extends Authenticatable
         return $this->belongsToMany(Vehicle::class, 'favorites')->withTimestamps();
     }
 
+    public function roleRelation()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    public function getRoleAttribute(): string
+    {
+        $roleId = (int) ($this->role_id ?? Role::USER);
+
+        return $roleId === Role::ADMIN ? 'admin' : 'user';
+    }
+
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');
@@ -67,6 +84,6 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return (int) $this->role_id === Role::ADMIN;
     }
 }

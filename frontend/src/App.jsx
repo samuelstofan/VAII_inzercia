@@ -17,6 +17,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Faq from "./pages/Faq";
 import AdminUsers from "./pages/AdminUsers";
+import ReportListing from "./pages/ReportListing";
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/o-nas" element={<About />} />
           <Route path="/kontakt" element={<Contact />} />
           <Route path="/faq" element={<Faq />} />
+          <Route path="/nahlasenie-inzeratu" element={<ReportListing />} />
           <Route path="/admin/uzivatelia" element={<AdminUsers />} />
         </Routes>
       </main>

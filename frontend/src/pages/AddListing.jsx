@@ -21,6 +21,7 @@ const initialFormState = {
   price: "",
   currency: "EUR",
   location: "",
+  features: [],
 };
 
 export default function AddListing() {
@@ -45,6 +46,32 @@ export default function AddListing() {
 
   const [brandChoice, setBrandChoice] = useState("");
   const [modelChoice, setModelChoice] = useState("");
+  const [features, setFeatures] = useState([]);
+  const [loadingFeatures, setLoadingFeatures] = useState(true);
+  const featureLabelMap = {
+    tempomat: "feature.cruiseControl",
+    "adaptivny tempomat": "feature.adaptiveCruiseControl",
+    "stresne okno": "feature.sunroof",
+    klimatizacia: "feature.airConditioning",
+    "automaticka klimatizacia": "feature.autoClimate",
+    "parkovacie senzory": "feature.parkingSensors",
+    "parkovacia kamera": "feature.parkingCamera",
+    navigacia: "feature.navigation",
+    bluetooth: "feature.bluetooth",
+    "android auto": "feature.androidAuto",
+    "apple carplay": "feature.appleCarPlay",
+    "vyhrievane sedadla": "feature.heatedSeats",
+    "kozeny interier": "feature.leatherInterior",
+    "led svetla": "feature.ledLights",
+    "xenonove svetla": "feature.xenonLights",
+    "elektricke okna": "feature.powerWindows",
+    "elektricke spatne zrkadla": "feature.powerMirrors",
+    "asistent rozjazdu do kopca": "feature.hillStartAssist",
+    "sledovanie mrtveho uhla": "feature.blindSpot",
+    "bezklicove startovanie": "feature.keylessStart",
+    "head-up displej": "feature.headUpDisplay",
+    "tazne zariadenie": "feature.towBar",
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -107,6 +134,16 @@ export default function AddListing() {
     });
   };
 
+  const handleFeatureToggle = (featureId) => {
+    setForm((prev) => {
+      const hasFeature = prev.features.includes(featureId);
+      const nextFeatures = hasFeature
+        ? prev.features.filter((id) => id !== featureId)
+        : [...prev.features, featureId];
+      return { ...prev, features: nextFeatures };
+    });
+  };
+
   useEffect(() => {
     let isMounted = true;
     setLoadingBrands(true);
@@ -131,6 +168,31 @@ export default function AddListing() {
       isMounted = false;
     };
   }, [t]);
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoadingFeatures(true);
+
+    api
+      .get("/api/features")
+      .then((res) => {
+        if (!isMounted) return;
+        setFeatures(res.data || []);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!isMounted) return;
+        setFeatures([]);
+      })
+      .finally(() => {
+        if (!isMounted) return;
+        setLoadingFeatures(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!form.brand_id) {
@@ -200,6 +262,7 @@ export default function AddListing() {
           price: data.price ?? "",
           currency: data.currency ?? "EUR",
           location: data.location ?? "",
+          features: (data.features || []).map((feature) => Number(feature.id)),
         });
         setBrandChoice(brandId);
         setModelChoice(modelId);
@@ -227,9 +290,14 @@ export default function AddListing() {
 
     const payload = new FormData();
     Object.entries(form).forEach(([key, value]) => {
+      if (key === "features") return;
       if (value !== "" && value !== null) {
         payload.append(key, value);
       }
+    });
+    payload.append("features_present", "1");
+    form.features.forEach((featureId) => {
+      payload.append("features[]", String(featureId));
     });
     imageSlots.forEach((file, index) => {
       if (!file) return;
@@ -549,6 +617,45 @@ export default function AddListing() {
               <option value="rwd">RWD</option>
               <option value="awd">AWD</option>
             </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium mb-2">
+              {t("addListing.labelFeatures")}
+            </label>
+            {loadingFeatures ? (
+              <p className="text-sm text-gray-500">
+                {t("addListing.featuresLoading")}
+              </p>
+            ) : features.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                {t("addListing.featuresEmpty")}
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                {features.map((feature) => {
+                  const featureId = Number(feature.id);
+                  const featureKey =
+                    featureLabelMap[String(feature.name || "").toLowerCase()];
+                  const featureLabel = featureKey
+                    ? t(featureKey)
+                    : feature.name;
+                  return (
+                    <label
+                      key={featureId}
+                      className="flex items-center gap-2 text-sm text-gray-700 border rounded-md px-3 py-2 bg-gray-50"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.features.includes(featureId)}
+                        onChange={() => handleFeatureToggle(featureId)}
+                      />
+                      <span>{featureLabel}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div>

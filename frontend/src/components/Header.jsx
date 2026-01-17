@@ -65,7 +65,7 @@ export default function Header() {
 
         {/* MOBILE MENU TOGGLE */}
         <button className="mobile-toggle" onClick={() => setOpen(!open)}>
-          ?
+          <img src="/menu-2.svg" alt="menu" />
         </button>
       </div>
 

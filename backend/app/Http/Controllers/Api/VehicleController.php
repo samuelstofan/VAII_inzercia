@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Message;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
 use App\Models\CarModel;
@@ -14,6 +15,7 @@ use App\Models\Brand;
 use App\Models\Fuel;
 use App\Models\Transmission;
 use App\Models\Drive;
+use App\Models\Feature;
 use Illuminate\Http\UploadedFile;
 
 class VehicleController extends Controller
@@ -31,6 +33,7 @@ class VehicleController extends Controller
                 'fuel',
                 'transmission',
                 'drive',
+                'features',
             ])
             ->where('is_active', true)
             ->whereNotNull('published_at')
@@ -52,6 +55,7 @@ class VehicleController extends Controller
                 'fuel',
                 'transmission',
                 'drive',
+                'features',
                 'user',
             ])
             ->where('is_active', true)
@@ -99,6 +103,9 @@ class VehicleController extends Controller
             'location' => ['required', 'string', 'max:255'],
             'images' => ['nullable'],
             'images.*' => ['file', 'image', 'max:4096'],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['integer', 'exists:features,id'],
+            'features_present' => ['nullable', 'boolean'],
         ]);
 
         $brand = null;
@@ -149,6 +156,11 @@ class VehicleController extends Controller
             'published_at' => now(),
         ]);
 
+        if ($request->has('features_present')) {
+            $featureIds = $validated['features'] ?? [];
+            $vehicle->features()->sync($featureIds);
+        }
+
         $images = $request->file('images', []);
         if ($images instanceof UploadedFile) {
             $images = [$images];
@@ -183,7 +195,7 @@ class VehicleController extends Controller
         }
 
         return response()->json(
-            $vehicle->load(['images', 'brand', 'model', 'fuel', 'transmission', 'drive']),
+            $vehicle->load(['images', 'brand', 'model', 'fuel', 'transmission', 'drive', 'features']),
             201
         );
     }
@@ -226,6 +238,9 @@ class VehicleController extends Controller
             'location' => ['required', 'string', 'max:255'],
             'images' => ['nullable'],
             'images.*' => ['file', 'image', 'max:4096'],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['integer', 'exists:features,id'],
+            'features_present' => ['nullable', 'boolean'],
         ]);
 
         $brand = null;
@@ -273,6 +288,10 @@ class VehicleController extends Controller
             'location' => $validated['location'],
         ]);
 
+        if ($request->has('features_present')) {
+            $vehicle->features()->sync($validated['features'] ?? []);
+        }
+
         $hasNewImages = $request->hasFile('primary_image') || $request->hasFile('images');
         if ($hasNewImages) {
             $images = $request->file('images', []);
@@ -314,7 +333,7 @@ class VehicleController extends Controller
         }
 
         return response()->json(
-            $vehicle->load(['images', 'brand', 'model', 'fuel', 'transmission', 'drive'])
+            $vehicle->load(['images', 'brand', 'model', 'fuel', 'transmission', 'drive', 'features'])
         );
     }
 
@@ -331,6 +350,7 @@ class VehicleController extends Controller
                 'fuel',
                 'transmission',
                 'drive',
+                'features',
             ])
             ->where('user_id', $id)
             ->where('is_active', true)
@@ -355,7 +375,7 @@ class VehicleController extends Controller
         $authId = $request->user()->id;
 
         $adminIds = User::query()
-            ->where('role', 'admin')
+            ->where('role_id', Role::ADMIN)
             ->where('id', '!=', $authId)
             ->pluck('id');
 

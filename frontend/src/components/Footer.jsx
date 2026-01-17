@@ -26,7 +26,9 @@ export default function Footer() {
 
           <div>
             <h3 className="footer-column-title">{t("footer.support")}</h3>
-            <p>{t("footer.reportListing")}</p>
+            <p>
+              <Link to="/nahlasenie-inzeratu">{t("footer.reportListing")}</Link>
+            </p>
             <p>
               <Link to="/faq">{t("footer.faq")}</Link>
             </p>

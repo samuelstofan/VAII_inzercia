@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\Fuel;
 use App\Models\Transmission;
 use App\Models\Drive;
+use App\Models\Feature;
 
 class Vehicle extends Model
 {
@@ -65,6 +66,11 @@ class Vehicle extends Model
     public function drive()
     {
         return $this->belongsTo(Drive::class, 'drive');
+    }
+
+    public function features()
+    {
+        return $this->belongsToMany(Feature::class);
     }
 
     public function user()
