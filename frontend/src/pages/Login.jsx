@@ -85,6 +85,7 @@ export default function Login() {
           {loading ? t("login.buttonLoading") : t("login.button")}
         </button>
       </form>
+
     </div>
   );
 }

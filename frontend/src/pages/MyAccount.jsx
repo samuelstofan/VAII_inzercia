@@ -21,6 +21,12 @@ export default function MyAccount() {
   const [deleting, setDeleting] = useState(false);
   const [isSeller, setIsSeller] = useState(false);
   const [savingSeller, setSavingSeller] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -113,6 +119,37 @@ export default function MyAccount() {
       alert(t("myAccount.alertDeleteError"));
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handlePasswordChange = async (event) => {
+    event.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError(t("myAccount.passwordErrorMismatch"));
+      return;
+    }
+
+    try {
+      setPasswordSaving(true);
+      await api.put("/api/user/password", {
+        current_password: currentPassword,
+        password: newPassword,
+        password_confirmation: confirmPassword,
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordSuccess(t("myAccount.passwordSuccess"));
+    } catch (err) {
+      console.error(err);
+      const message =
+        err.response?.data?.message || t("myAccount.passwordErrorGeneric");
+      setPasswordError(message);
+    } finally {
+      setPasswordSaving(false);
     }
   };
 
@@ -210,6 +247,63 @@ export default function MyAccount() {
             {saving ? t("myAccount.saving") : t("myAccount.save")}
           </button>
         </form>
+
+        <hr className="my-6" />
+
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-3">
+            {t("myAccount.passwordSectionTitle")}
+          </h2>
+
+          {passwordSuccess && (
+            <p className="text-green-600 mb-3">{passwordSuccess}</p>
+          )}
+          {passwordError && (
+            <p className="text-red-600 mb-3">{passwordError}</p>
+          )}
+
+          <form onSubmit={handlePasswordChange} className="flex flex-col gap-3">
+            <label className="text-sm text-gray-600">
+              {t("myAccount.currentPasswordLabel")}
+            </label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(event) => setCurrentPassword(event.target.value)}
+              className="border px-3 py-2 rounded"
+              required
+            />
+            <label className="text-sm text-gray-600">
+              {t("myAccount.newPasswordLabel")}
+            </label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+              className="border px-3 py-2 rounded"
+              required
+            />
+            <label className="text-sm text-gray-600">
+              {t("myAccount.confirmPasswordLabel")}
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              className="border px-3 py-2 rounded"
+              required
+            />
+            <button
+              type="submit"
+              disabled={passwordSaving}
+              className="bg-black text-white py-2 rounded disabled:opacity-50"
+            >
+              {passwordSaving
+                ? t("myAccount.passwordSaving")
+                : t("myAccount.passwordSave")}
+            </button>
+          </form>
+        </div>
 
         <hr className="my-6" />
 

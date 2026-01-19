@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\FeatureController;
 Route::middleware(['auth:sanctum'])->get('/user', [UserController::class, 'getUser']);
 
 Route::middleware('auth:sanctum')->put('/user/update', [UserController::class, 'updateUser']);
+Route::middleware('auth:sanctum')->put('/user/password', [UserController::class, 'updatePassword']);
 
 Route::middleware('auth:sanctum')->delete('/user/delete', [UserController::class, 'deleteUser']);
 
