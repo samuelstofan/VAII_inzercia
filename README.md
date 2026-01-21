@@ -1,6 +1,7 @@
-﻿
+﻿### Na vytvorenie tejto aplikacie bola vyuzita generativna AI
+
 ### 1) Konfiguracne subory (.env)
-Backend (`backend/.env`) do example doplniť:
+Backend (`backend/.env`) do example doplnit:
 APP_URL=http://localhost:8000
 FRONTEND_URL=http://localhost:5173
 
